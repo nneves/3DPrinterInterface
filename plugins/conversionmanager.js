@@ -1,1 +1,0 @@
-// conversion manager: converts .STL files to .GCODE via Slic3r

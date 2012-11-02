@@ -1,1 +1,0 @@
-// SerialPort communication driver
