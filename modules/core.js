@@ -159,8 +159,6 @@ function verifyUpdateConfig (iconfig) {
 };
 
 gcodeStream.write = function (data) {
-  	//return true // true means 'yes i am ready for more data now'
-  	// OR return false and emit('drain') when ready later
 
   	console.log(data);
 
@@ -190,6 +188,9 @@ gcodeStream.write = function (data) {
 
 	// send event to trigger sendGCodeBlockData(..) function 
 	evnt.emit('sendGCodeBlockData', gcodedata);
+
+  	//return true // true means 'yes i am ready for more data now'
+  	// OR return false and emit('drain') when ready later	
 	return false;
 };
 
