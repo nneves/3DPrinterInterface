@@ -3,12 +3,14 @@ var config = {serialport: "/dev/ttyACM0", baudrate: 115200},
 	iSerialPort = iserialport.SerialPort, // Serial Port - Localize object constructor
 	spCBAfterOpen = undefined,
 	sp = undefined,
-	spFlagInit = false;
+	spFlagInit = false,
+	osFlagAssigned = false;
 
 var stream = require('stream'),
-	gcodeStream = new stream.Stream();
+	inputStream = new stream.Stream(),
+	outputStream = new stream.Stream();
 
-gcodeStream.writable = true;
+inputStream.writable = true;
 
 var util = require('util'),
 	eventemitter = require('events').EventEmitter;
@@ -84,11 +86,13 @@ function spInitialize (iconfig) {
 
 	// Register Serial Port RX callback
 	sp.on("data", function (data) {
-	   console.log("[Board_TX]->[Node.JS_RX]: %s\r\n", data);
+	   //console.log("[Board_TX]->[Node.JS_RX]: %s\r\n", data);
 	   	
 	   	if (data.indexOf("ok") != -1) {
 			// send event to trigger sendGCodeBlockData(..) function
 			evnt.emit('sendGCodeBlockData', gcodedata);
+			if (osFlagAssigned == true)
+				outputStream.write('<-'+data+'\r\n', 'utf8');
 		}
 	});
 
@@ -118,7 +122,7 @@ function spWrite (cmd) {
 	if (cmd.charAt(cmd.length-1) != '\n')
 		endchar = '\n';
 
-	console.log('SerialPort Write: '+cmd+endchar);
+	console.log('->'+cmd+endchar);
 
 	// writes data to serialport
 	sp.write(cmd+endchar);
@@ -139,6 +143,11 @@ function spSetCallback (cbfunc) {
 	sp.on("data", cbfunc);
 };
 
+function setOutputStream (iOutputStream) {
+	outputStream = iOutputStream;
+	osFlagAssigned = true;
+}
+
 //------------------------------------------------------------------
 // private functions
 //------------------------------------------------------------------
@@ -158,9 +167,9 @@ function verifyUpdateConfig (iconfig) {
 	console.log('Serial Port initialization: %s, %d ...', config.serialport ,config.baudrate);
 };
 
-gcodeStream.write = function (data) {
+inputStream.write = function (data) {
 
-  	console.log(data);
+  	//console.log(data);
 
   	// split stream 'raw' data into string lines (array)
 	internalcounter = (data.match(/\n/g)||[]).length;
@@ -194,10 +203,10 @@ gcodeStream.write = function (data) {
 	return false;
 };
 
-gcodeStream.end = function (data) {
+inputStream.end = function (data) {
   // no more writes after end
   // emit "close" (optional)
-  console.log("gcodeStream END!");
+  console.log("inputStream END!");
   this.emit('close');
 };
 
@@ -212,7 +221,7 @@ function sendGCodeBlockData (igcodedata) {
 	  	igcodedata.sp_queue_current = 0;	
 	  	//console.log('GCode ReadStream Resume\r\n');
 	  	//igcodedata.readablestream.resume();	
-	  	gcodeStream.emit('drain');
+	  	inputStream.emit('drain');
 	  	return;	
 	}
 
@@ -226,9 +235,11 @@ function sendGCodeBlockData (igcodedata) {
 
 		setTimeout(function () {
 
-			console.log('SerialPort simulated callback response (/dev/null): ok\r\n');
+			//console.log('SerialPort simulated callback response (/dev/null): ok\r\n');
 			// send event to trigger sendGCodeBlockData(..) function
 			evnt.emit('sendGCodeBlockData', igcodedata);
+			if (osFlagAssigned == true)
+				outputStream.write('<-ok\r\n\r\n', 'utf8');
 		}, 10 /*250*/);
 	}
 };
@@ -242,6 +253,7 @@ module.exports = {
 	writePrinter: spWrite,
 	setCbPrinterRx: spSetCallback,
 	setCbAfterOpenPrinter: spSetCbAfterOpen,
-	gcodeStreamPrinter: gcodeStream
+	inputStreamPrinter: inputStream,
+	setOutputStreamPrinter: setOutputStream
 };
 //------------------------------------------------------------------

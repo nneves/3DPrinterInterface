@@ -29,6 +29,7 @@ var fs = require('fs'),
 // objects initialization/configuration
 //------------------------------------------------------------------
 core.setCbAfterOpenPrinter(main);
+core.setOutputStreamPrinter(process.stdout);
 
 // try interface without real 3d printer by using /dev/null
 core.setConfigPrinter({serialport: "/dev/null", baudrate: 115200});
@@ -47,13 +48,13 @@ function main () {
 	if (path !==undefined ) {
 		readableStream = fs.createReadStream(path, {'bufferSize': 1 * 256});
 		readableStream.setEncoding('utf8');
-		readableStream.pipe(core.gcodeStreamPrinter);
+		readableStream.pipe(core.inputStreamPrinter);
 	}
 	else {
 		console.log("Get stream from STDIN pipe...");
 		// http://docs.nodejitsu.com/articles/advanced/streams/how-to-use-stream-pipe
 
 		process.stdin.setEncoding('utf8');
-		process.stdin.pipe(core.gcodeStreamPrinter, { end: false });
+		process.stdin.pipe(core.inputStreamPrinter, { end: false });
 	}
 }
