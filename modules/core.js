@@ -3,14 +3,14 @@ var config = {serialport: "/dev/ttyACM0", baudrate: 115200},
 	iSerialPort = iserialport.SerialPort, // Serial Port - Localize object constructor
 	spCBAfterOpen = undefined,
 	sp = undefined,
-	spFlagInit = false,
-	osFlagAssigned = false;
+	spFlagInit = false;
 
 var stream = require('stream'),
 	inputStream = new stream.Stream(),
 	outputStream = new stream.Stream();
 
 inputStream.writable = true;
+outputStream.readble = true;
 
 var util = require('util'),
 	eventemitter = require('events').EventEmitter;
@@ -89,10 +89,11 @@ function spInitialize (iconfig) {
 	   //console.log("[Board_TX]->[Node.JS_RX]: %s\r\n", data);
 	   	
 	   	if (data.indexOf("ok") != -1) {
+
+	   		outputStream.emit('data', '<-'+data+'\r\n');
+
 			// send event to trigger sendGCodeBlockData(..) function
 			evnt.emit('sendGCodeBlockData', gcodedata);
-			if (osFlagAssigned == true)
-				outputStream.write('<-'+data+'\r\n', 'utf8');
 		}
 	});
 
@@ -142,11 +143,6 @@ function spSetCallback (cbfunc) {
 	// Register (additional) Serial Port RX callback
 	sp.on("data", cbfunc);
 };
-
-function setOutputStream (iOutputStream) {
-	outputStream = iOutputStream;
-	osFlagAssigned = true;
-}
 
 //------------------------------------------------------------------
 // private functions
@@ -235,11 +231,12 @@ function sendGCodeBlockData (igcodedata) {
 
 		setTimeout(function () {
 
+			outputStream.emit('data', '<-ok\r\n\r\n');
+
 			//console.log('SerialPort simulated callback response (/dev/null): ok\r\n');
 			// send event to trigger sendGCodeBlockData(..) function
 			evnt.emit('sendGCodeBlockData', igcodedata);
-			if (osFlagAssigned == true)
-				outputStream.write('<-ok\r\n\r\n', 'utf8');
+			
 		}, 10 /*250*/);
 	}
 };
@@ -254,6 +251,6 @@ module.exports = {
 	setCbPrinterRx: spSetCallback,
 	setCbAfterOpenPrinter: spSetCbAfterOpen,
 	inputStreamPrinter: inputStream,
-	setOutputStreamPrinter: setOutputStream
+	outputStreamPrinter: outputStream
 };
 //------------------------------------------------------------------

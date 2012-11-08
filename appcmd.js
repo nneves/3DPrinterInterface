@@ -29,12 +29,12 @@ var fs = require('fs'),
 // objects initialization/configuration
 //------------------------------------------------------------------
 core.setCbAfterOpenPrinter(main);
-core.setOutputStreamPrinter(process.stdout);
 
 // try interface without real 3d printer by using /dev/null
 core.setConfigPrinter({serialport: "/dev/null", baudrate: 115200});
 core.initializePrinter();
-// or (with 3d printer hardware)
+
+// or (with 3d printer hardware) - alternative init method with args
 //core.initializePrinter({serialport: "/dev/tty.usbmodem622", baudrate: 115200});
 
 //------------------------------------------------------------------
@@ -49,6 +49,7 @@ function main () {
 		readableStream = fs.createReadStream(path, {'bufferSize': 1 * 256});
 		readableStream.setEncoding('utf8');
 		readableStream.pipe(core.inputStreamPrinter);
+		core.outputStreamPrinter.pipe(process.stdout);
 	}
 	else {
 		console.log("Get stream from STDIN pipe...");
@@ -56,5 +57,6 @@ function main () {
 
 		process.stdin.setEncoding('utf8');
 		process.stdin.pipe(core.inputStreamPrinter, { end: false });
+		core.outputStreamPrinter.pipe(process.stdout);
 	}
 }
