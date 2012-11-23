@@ -1,3 +1,9 @@
+// Core Module Objectives:
+// - initialize serial port to communicate with a 3d printer
+// - exports a writable stream to receive data for printer 
+//   (GCODE data stream or individual GCODE lines)
+// - exports a readable stream to write responses from printer
+
 var config = {serialport: "/dev/ttyACM0", baudrate: 115200},	
 	iserialport = require("serialport"),
 	iSerialPort = iserialport.SerialPort, // Serial Port - Localize object constructor
