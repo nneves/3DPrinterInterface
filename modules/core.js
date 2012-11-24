@@ -4,7 +4,7 @@
 //   (GCODE data stream or individual GCODE lines)
 // - exports a readable stream to write responses from printer
 
-var config = {serialport: "/dev/ttyACM0", baudrate: 115200},	
+var config = {serialport: "/dev/ttyACM0", baudrate: 115200},
 	iserialport = require("serialport"),
 	iSerialPort = iserialport.SerialPort, // Serial Port - Localize object constructor
 	spCBAfterOpen = undefined,
@@ -92,7 +92,7 @@ function spInitialize (iconfig) {
 
 	// Register Serial Port RX callback
 	sp.on("data", function (data) {
-	   //console.log("[Board_TX]->[Node.JS_RX]: %s\r\n", data);
+	   console.log("[Board_TX]->[Node.JS_RX]: %s\r\n", data);
 	   	
 	   	if (data.indexOf("ok") != -1) {
 
@@ -133,6 +133,19 @@ function spWrite (cmd) {
 
 	// writes data to serialport
 	sp.write(cmd+endchar);
+
+	// normal conditions: serialport (cnc/reprap/3dprinter) will responde 'ok' and sp.on("data"...) is triggered
+	// special condition: /dev/null needs to emulate serialport callback (using setTimeout for additional delay)
+	if (config.serialport.toUpperCase() === '/DEV/NULL') {
+
+		setTimeout(function () {
+
+			outputStream.emit('data', '<-ok\r\n\r\n');
+			
+			console.log('SerialPort simulated callback response (/dev/null): ok\r\n');
+
+		}, 10 /*250*/);
+	}	
 
 	return true;
 };
@@ -239,7 +252,7 @@ function sendGCodeBlockData (igcodedata) {
 
 			outputStream.emit('data', '<-ok\r\n\r\n');
 
-			//console.log('SerialPort simulated callback response (/dev/null): ok\r\n');
+			console.log('SerialPort simulated callback response (/dev/null): ok\r\n');
 			// send event to trigger sendGCodeBlockData(..) function
 			evnt.emit('sendGCodeBlockData', igcodedata);
 			

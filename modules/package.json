@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
+    "union": "0.3.0",
+    "flatiron": "0.2.8",
+    "serialport": "1.0.4"
   },
   "devDependenices": {
     "api-easy": "0.3.2",
