@@ -1,0 +1,126 @@
+body {
+  padding: 0px;
+  font: 12px "Lucida Grande", Helvetica, Arial, sans-serif;
+  background-color:#edeceb;  
+}
+
+a {
+  color: #00B7FF;
+}
+
+.header {
+  background-color:#05ABD5;	
+  width:auto;
+  height:75px;
+  //text-align:center;
+}
+
+.header_image {
+  position:relative;
+  top:15px;
+  left:20px;
+
+}
+
+.block01 {
+  	
+}
+
+.block02 {
+  position:absolute;
+  left:60px;
+  top:330px; 
+  width:400px;
+}
+
+.block03 {
+  position:absolute;
+  left:60px;
+  top:280px; 
+  width:100px;
+  height:40px;
+  background-color: #DEDEDE;
+}
+
+.block04 {
+  position:absolute;
+  left:160px;
+  top:280px; 
+  width:140px;
+  height:40px;
+  background-color: #DEDEDE;
+}
+
+.block05 {
+  position:absolute;
+  left:300px;
+  top:280px; 
+  width:130px;
+  height:40px;
+  background-color: #DEDEDE;
+}
+
+.block06 {
+  position:absolute;
+  left:60px;
+  top:450px; 
+  width:400px;
+}
+
+.xplus {
+  position:absolute;
+  left:220px;
+  top: 150px;
+}
+
+.xminus {
+  position:absolute;
+  left:80px;
+  top: 150px;
+}
+
+.yplus {
+  position:absolute;
+  left:147px;
+  top: 100px;
+}
+
+.yminus {
+  position:absolute;
+  left:147px;
+  top: 207px;
+}
+
+.zplus {
+  position:absolute;
+  left:350px;
+  top: 100px;
+}
+
+.zminus {
+  position:absolute;
+  left:350px;
+  top: 207px;
+}
+
+.home {
+  position:absolute;
+  left:142px;
+  top: 161px;
+}
+
+.jogmode {
+  width:85px;  
+}
+
+.xyfeedrate {
+  width:125px;  
+}
+
+.zfeedrate {
+  width:120px;  
+}
+
+.gcodefilestream {
+  width:365px;  
+}

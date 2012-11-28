@@ -2,7 +2,7 @@
 
 var flatiron = require('flatiron'),
     app = flatiron.app,
-    config = {tcpPort: 8080},
+    config = {tcpPort: 8081},
     mainapp = require('./mainapp.js');
 
 //------------------------------------------------------------------
@@ -25,7 +25,7 @@ app.router.configure({"notfound":noroutingfound});
 // flatiron router - API for GCODE commands - call parseGCodeCmd from enginecore.js
 app.router.get('/', help);
 
-app.router.get(/sendcmd\/((\w|.)*)/, sendPrinterCmd);
+app.router.get(/sendprintercmd\/((\w|.)*)/, sendPrinterCmd);
 
 //app.router.get(/urldownload\/((\w|.)*)/, downloadUrl);
 
@@ -51,10 +51,13 @@ function help () {
 
 function noroutingfound () {
 
+	var response = {response: false, error: 'Resource not available!'};
+
 	// responding back to the brower request
-	this.res.writeHead(404, {'Content-Type':'text/plain'});
-	this.res.write('Resource not available!');
-	this.res.end();	
+	//this.res.writeHead(404, {'Content-Type':'application/json'});
+	this.res.writeHead(200, {'Content-Type':'application/json'});
+	this.res.write(JSON.stringify(response));
+	this.res.end();			
 }
 /*
 function downloadUrl (url) {

@@ -1,0 +1,55 @@
+<!doctype html>  
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>3D Printer WebInterface</title>
+  <link rel="stylesheet" href="css/reset.css" media="all" />
+  <link rel="stylesheet" href="css/style.css" media="all" />
+</head>
+<body>
+	<div id="header" class="header"><img src="images/ultimaker.png" alt="Ultimaker" class="header_image"></div>
+
+	<div id="block01" class="block01">
+    <img src="images/y-plus.png" class="yplus" onClick="printer.sendCmd('G28');">
+    <img src="images/y-minus.png" class="yminus" onClick="printer.sendCmd('G28');">
+		<img src="images/x-plus.png" class="xplus" onClick="printer.sendCmd('G28');">
+		<img src="images/x-minus.png" class="xminus" onClick="printer.sendCmd('G28');">
+		<img src="images/z-plus.png" class="zplus" onClick="printer.sendCmd('G28');">
+		<img src="images/z-minus.png" class="zminus" onClick="printer.sendCmd('G28');">
+    <img src="images/home.png" width="61" height="31" class="home" onClick="printer.sendCmd('G28');">
+	</div>
+
+    <div id="block03" class="block03">
+      <p>Jog Mode (mm)</p>
+      <input type="text" name="njogmode" id="jogname" value="10" class="jogmode" />
+    </div>
+
+    <div id="block04" class="block04">
+      <p>XY Feedrate (mm/min.)</p>
+      <input type="text" name="nxyfeedrate" id="xyfeedrate" value="4000" class="xyfeedrate" />
+    </div>      
+
+    <div id="block05" class="block05">
+      <p>Z Feedrate (mm/min.)</p>
+      <input type="text" name="nzfeedrate" id="zfeedrate" value="120" class="zfeedrate" />
+    </div>      
+
+    <div id="block02" class="block02">     
+      <p>GCode manual command</p>
+      <textarea id="textSendCmd" rows="4" cols="50">G1 X0 Y0 Z0 F8000</textarea><br>
+      <button id="btnSendCmd" type="button" onClick="3dp.sendPrinterCmd(textSendCmd.value)">Send Command</button><br><br>
+    </div>
+
+    <div id="block06" class="block06">
+      <p>GCode File Stream</p>
+      <input type="text" name="gcodefs" id="gcodefs" value="3D_Knot.gcode" class="gcodefilestream" />
+      <button id="btnFileStream" type="button" onClick="printer.sendFilename(gcodefs.value)">Send to Printer</button><br><br>
+    </div>
+
+<!--<script src="js/printer.js"></script>-->
+  <script type="text/javascript" src="js/printer.js"></script>
+  <script type="text/javascript">
+    var printer = PRINTER.WebInterface();
+  </script>
+	</body>
+</html>
