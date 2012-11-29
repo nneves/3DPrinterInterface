@@ -19,11 +19,14 @@ Initial ./modules/core.js module is now working with writable stream interface, 
 It is now possible to test the WebInterface and send a simple GCODE command to printer. There is also an initial support to print data from .gcode files located at /bin/gcode/ .
 
 // update node required packages
+```bash
 $ npm update
+```
 
 // launch demo WebInterface (will run on port 8080, REST API on 8081 and using /dev/null to emulate printer serial port - printer response emulated by timer)
+```bash
 $ node app.js
-
+```
 
 
 Testing core.js module via command line
