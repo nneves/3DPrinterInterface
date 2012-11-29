@@ -32,20 +32,24 @@ function sendPrinterCmd (data) {
 
 function sendPrinterFilename (filename) {
 	
-	/*
 	var path = process.cwd()+'/bin/gcode/'+filename;
 	console.log('Send file to printer: %s', path);
-	var result = false;
-	
 
 	readableStream = fs.createReadStream(path, {'bufferSize': 1 * 256});
 	readableStream.setEncoding('utf8');
+
+	// This catches any errors that happen while creating the readable stream (usually invalid names)
+	readableStream.on('error', function(err) {
+		console.log('Error while trying to sendPrinterFilename: ', err);
+		// error triggered asynchronously, need to report back to the origin of the request
+	});
+
 	readableStream.pipe(printercore.inputStreamPrinter);
 	printercore.outputStreamPrinter.pipe(process.stdout);
 
-	return result;
-	*/
-	return false;
+	// true -> request/call accepted with success, any other errors orginated from 
+	// the asynchronous requests must be reported to the origin via other channels
+	return true; 
 }
 
 //------------------------------------------------------------------
