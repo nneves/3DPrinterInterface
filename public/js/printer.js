@@ -39,7 +39,7 @@ PRINTER.WebInterface = function () {
 PRINTER.WebInterface.prototype.sendCmd = function (cmd) {
 
 	var sendReq = this._getXHRObject();	
-	var url_cmd = this.restserver_addr+'/sendprintercmd/'+cmd;
+	var url_cmd = this.restserver_addr+'/api/sendprintercmd/'+cmd;
 
 	if (sendReq.readyState == 4 || sendReq.readyState == 0) {
 		sendReq.open("GET",url_cmd,true);
@@ -55,7 +55,7 @@ PRINTER.WebInterface.prototype.sendFilename = function (filename) {
 
 	// internal ajax request object
 	var sendReq = this._getXHRObject();	
-	var url_cmd = this.restserver_addr+'/sendprinterfilename/'+filename;
+	var url_cmd = this.restserver_addr+'/api/sendprinterfilename/'+filename;
 
 	if (sendReq.readyState == 4 || sendReq.readyState == 0) {
 		sendReq.open("GET",url_cmd,true);

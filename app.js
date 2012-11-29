@@ -26,11 +26,8 @@ app.http.before = [
   ecstatic(__dirname + '/public')
 ];
 
-// http proxy rules
-app.router.get(/sendprintercmd\/((\w|.)*)/, requestProxy);
-
-// not yet implemented in the rest.js module ... wip
-//app.router.get(/sendprinterfilename\/((\w|.)*)/, requestProxy);
+// http proxy rules - valid for all /api requests
+app.router.get(/api\/((\w|.)*)/, requestProxy);
 
 // launch app on tcpoprt
 app.start(tcpport);

@@ -1,6 +1,8 @@
 // mainapp.js -
 
 var config = {},
+	fs = require('fs'),
+	readableStream,
 	downloadr = require('./downloader.js'),
 	slicer = require('./slicer.js'),
 	printercore = require('./core.js');
@@ -22,10 +24,28 @@ printercore.initializePrinter();
 //------------------------------------------------------------------
 // public functions
 //------------------------------------------------------------------
-function writePrinterCmd (data) {
+function sendPrinterCmd (data) {
 	
 	var result = printercore.writePrinter(data);
 	return result;
+}
+
+function sendPrinterFilename (filename) {
+	
+	/*
+	var path = process.cwd()+'/bin/gcode/'+filename;
+	console.log('Send file to printer: %s', path);
+	var result = false;
+	
+
+	readableStream = fs.createReadStream(path, {'bufferSize': 1 * 256});
+	readableStream.setEncoding('utf8');
+	readableStream.pipe(printercore.inputStreamPrinter);
+	printercore.outputStreamPrinter.pipe(process.stdout);
+
+	return result;
+	*/
+	return false;
 }
 
 //------------------------------------------------------------------
@@ -68,7 +88,8 @@ function downloadUrl (url, destpath) {
 //------------------------------------------------------------------
 module.exports = {
 	setConfig: setConfig,
-	writePrinterCmd: writePrinterCmd
+	sendPrinterCmd: sendPrinterCmd,
+	sendPrinterFilename: sendPrinterFilename
 };
 //------------------------------------------------------------------
 // demo: ...

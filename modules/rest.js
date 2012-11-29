@@ -23,9 +23,11 @@ app.router.configure({"notfound":noroutingfound});
 //------------------------------------------------------------------
 
 // flatiron router - API for GCODE commands - call parseGCodeCmd from enginecore.js
-app.router.get('/', help);
+app.router.get('/api', help);
 
-app.router.get(/sendprintercmd\/((\w|.)*)/, sendPrinterCmd);
+app.router.get(/api\/sendprintercmd\/((\w|.)*)/, sendPrinterCmd);
+
+app.router.get(/api\/sendprinterfilename\/((\w|.)*)/, sendPrinterFilename);
 
 //app.router.get(/urldownload\/((\w|.)*)/, downloadUrl);
 
@@ -72,7 +74,18 @@ function downloadUrl (url) {
 
 function sendPrinterCmd (data) {
 
-	var result = mainapp.writePrinterCmd(data);
+	var result = mainapp.sendPrinterCmd(data);
+	var response = {response: result};
+
+	// responding back to the brower request
+	this.res.writeHead(200, {'Content-Type':'application/json'});
+	this.res.write(JSON.stringify(response));
+	this.res.end();		
+}
+
+function sendPrinterFilename (filename) {
+
+	var result = mainapp.sendPrinterFilename(filename);
 	var response = {response: result};
 
 	// responding back to the brower request
