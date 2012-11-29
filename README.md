@@ -10,6 +10,22 @@ Status: Initial structure ideia ... still a long way to go!
 * Update1 (06-Nov-2012): 
 Initial ./modules/core.js module is now working with writable stream interface, serialport communication support completed and also internal minimal cache/stream data parser engine in place.
 
+* Update2 (29-Nov-2012): 
+- Ported and re-factored R2C2 webinterface (including client javascript helper file)
+- Added app.js code to deploy initial WebInterface for UI testing
+- Added rest.js module code to deploy REST API
+- Created mainapp.js to bind upper rest.js module requests with lower level modules (core.js serial communications module, slicer.js, downloader.js, etc)
+
+It is now possible to test the WebInterface and send a simple GCODE command to printer. There is also an initial support to print data from .gcode files located at /bin/gcode/ .
+
+// update node required packages
+$ npm update
+
+// launch demo WebInterface (will run on port 8080, REST API on 8081 and using /dev/null to emulate printer serial port - printer response emulated by timer)
+$ node app.js
+
+
+
 Testing core.js module via command line
 ----------------------
 
