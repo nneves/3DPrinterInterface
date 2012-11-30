@@ -75,3 +75,20 @@ Using MBED microcontroller (could also use an Arduino) for a 3d printer emulator
 http://mbed.org/users/botdream/code/3dprinter_usbserialport_emulator/
 
 Also using /dev/null interface for dummy tests.
+
+License
+=======
+Copyright (C) 2012 Nelson Neves
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see http://www.gnu.org/licenses/agpl-3.0.html
