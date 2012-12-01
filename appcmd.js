@@ -32,10 +32,12 @@ core.setCbAfterOpenPrinter(main);
 
 // try interface without real 3d printer by using /dev/null
 core.setConfigPrinter({serialport: "/dev/null", baudrate: 115200});
-core.initializePrinter();
+//core.setConfigPrinter({serialport: "/dev/tty.usbmodem621", baudrate: 115200});
 
 // or (with 3d printer hardware) - alternative init method with args
-//core.initializePrinter({serialport: "/dev/tty.usbmodem622", baudrate: 115200});
+//core.initializePrinter({serialport: "/dev/tty.usbmodem621", baudrate: 115200});
+
+core.initializePrinter();
 
 //------------------------------------------------------------------
 // main

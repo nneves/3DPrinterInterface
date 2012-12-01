@@ -70,11 +70,15 @@ var gcodedata = GCodeDataClass();
 //------------------------------------------------------------------
 function spSetConfig (iconfig) {
 
+	console.log('Serial Port Set Config');
+
 	// verify and updates config
 	verifyUpdateConfig(iconfig);
 };
 
 function spInitialize (iconfig) {
+
+	console.log('Serial Port initilization procedure');
 
 	// verify if object was already initialized
 	if (sp !== undefined)
@@ -85,6 +89,7 @@ function spInitialize (iconfig) {
 		verifyUpdateConfig(iconfig);
 
 	// SerialPort object initializationconsole
+	console.log('Instantiate Serial Port object');
 	sp = new iSerialPort(config.serialport, {
 	    baudrate: config.baudrate,
 	    parser: iserialport.parsers.readline("\n")
@@ -140,12 +145,12 @@ function spWrite (cmd) {
 
 		setTimeout(function () {
 
-			outputStream.emit('data', '<-ok\r\n\r\n');
+			outputStream.emit('data', '<--ok\r\n\r\n');
 			
 			console.log('SerialPort simulated callback response (/dev/null): ok\r\n');
 
-		}, 10 /*250*/);
-	}	
+		}, 10 );
+	}
 
 	return true;
 };
@@ -159,6 +164,9 @@ function spSetCbAfterOpen (cbfunc) {
 };
 
 function spSetCallback (cbfunc) {
+
+	console.log('Serial Port SetCallback procedure:', cbfunc);
+
 	// Register (additional) Serial Port RX callback
 	sp.on("data", cbfunc);
 };
@@ -179,7 +187,7 @@ function verifyUpdateConfig (iconfig) {
 		console.log('Config BaudRate: '+iconfig.baudrate);	
 		config.baudrate = iconfig.baudrate;
 	}
-	console.log('Serial Port initialization: %s, %d ...', config.serialport ,config.baudrate);
+	console.log('Serial Port initialization: %s, %d ...', config.serialport, config.baudrate);
 };
 
 inputStream.write = function (data) {
@@ -221,7 +229,7 @@ inputStream.write = function (data) {
 inputStream.end = function (data) {
   // no more writes after end
   // emit "close" (optional)
-  console.log("inputStream END!");
+  console.log("[Core.js] Close inputStream!");
   this.emit('close');
 };
 
@@ -267,7 +275,7 @@ module.exports = {
 	setConfigPrinter: spSetConfig,
 	initializePrinter: spInitialize,
 	writePrinter: spWrite,
-	setCbPrinterRx: spSetCallback,
+	//setCbPrinterRx: spSetCallback,
 	setCbAfterOpenPrinter: spSetCbAfterOpen,
 	inputStreamPrinter: inputStream,
 	outputStreamPrinter: outputStream

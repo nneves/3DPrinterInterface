@@ -20,16 +20,7 @@ PRINTER.WebInterface = function () {
 	}	
 	console.log("Creating PRINTER.WebInterface object.");
 
-	/*
-	// avoid using this solution, will require special Access Control rule to allow
-	// making a request to REST SERVER on different port from normal UI WebServer
-	this.restserver_protocol = "http://";
-	this.restserver_ip = "127.0.0.1";
-	this.restserver_tcpport = "8081";
-	this.restserver_addr = this.restserver_protocol+this.restserver_ip+":"+this.restserver_tcpport;
-	console.log("REST SERVER ADDR: %s", this.restserver_addr);
-	*/
-	this.restserver_addr = "";
+	this.initRelativeMoveCmd();
 };
 //-----------------------------------------------------------------------------
 
@@ -39,7 +30,7 @@ PRINTER.WebInterface = function () {
 PRINTER.WebInterface.prototype.sendCmd = function (cmd) {
 
 	var sendReq = this._getXHRObject();	
-	var url_cmd = this.restserver_addr+'/api/sendprintercmd/'+cmd;
+	var url_cmd = '/api/sendprintercmd/'+cmd;
 
 	if (sendReq.readyState == 4 || sendReq.readyState == 0) {
 		sendReq.open("GET",url_cmd,true);
@@ -55,7 +46,7 @@ PRINTER.WebInterface.prototype.sendFilename = function (filename) {
 
 	// internal ajax request object
 	var sendReq = this._getXHRObject();	
-	var url_cmd = this.restserver_addr+'/api/sendprinterfilename/'+filename;
+	var url_cmd = '/api/sendprinterfilename/'+filename;
 
 	if (sendReq.readyState == 4 || sendReq.readyState == 0) {
 		sendReq.open("GET",url_cmd,true);
@@ -95,7 +86,68 @@ PRINTER.WebInterface.prototype._XHRcallback = function (url) {
 };
 //-----------------------------------------------------------------------------	
 
-
 //-----------------------------------------------------------------------------
 // AUX - demo functionality
 //-----------------------------------------------------------------------------
+// initialize printer to relative movement
+PRINTER.WebInterface.prototype.initRelativeMoveCmd = function() {
+    this.sendCmd('G91');
+}
+
+// auxiliar function to compose absolute gcode move command 
+PRINTER.WebInterface.prototype.generateGCODE = function (posx, posy, posz, feedrate) {
+
+	var igcode = 	"G1 X"+posx.toFixed(6).toString(10)+
+					" Y"+posy.toFixed(6).toString(10)+
+					" Z"+posz.toFixed(6).toString(10)+
+					" F"+feedrate.toString(10);
+	return igcode;
+};
+
+PRINTER.WebInterface.prototype.moveXPlus = function(jogvalue, feedrate) {
+
+	var gcodeCMD = this.generateGCODE(jogvalue, 0, 0, feedrate);
+
+	console.log("GCODE: ", gcodeCMD);
+	this.sendCmd(gcodeCMD);
+}
+
+PRINTER.WebInterface.prototype.moveXMinus = function(jogvalue, feedrate) {
+
+	var gcodeCMD = this.generateGCODE(-jogvalue, 0, 0, feedrate);
+
+	console.log("GCODE: ", gcodeCMD);
+	this.sendCmd(gcodeCMD);
+}
+
+PRINTER.WebInterface.prototype.moveYPlus = function(jogvalue, feedrate) {
+
+	var gcodeCMD = this.generateGCODE(0, jogvalue, 0, feedrate);
+
+	console.log("GCODE: ", gcodeCMD);
+	this.sendCmd(gcodeCMD);
+}
+
+PRINTER.WebInterface.prototype.moveYMinus = function(jogvalue, feedrate) {
+
+	var gcodeCMD = this.generateGCODE(0, -jogvalue, 0, feedrate);
+
+	console.log("GCODE: ", gcodeCMD);
+	this.sendCmd(gcodeCMD);
+}
+
+PRINTER.WebInterface.prototype.moveZPlus = function(jogvalue, feedrate) {
+
+	var gcodeCMD = this.generateGCODE(0, 0, jogvalue, feedrate);
+
+	console.log("GCODE: ", gcodeCMD);
+	this.sendCmd(gcodeCMD);
+}
+
+PRINTER.WebInterface.prototype.moveZMinus = function(jogvalue, feedrate) {
+
+	var gcodeCMD = this.generateGCODE(0, 0, -jogvalue, feedrate);
+
+	console.log("GCODE: ", gcodeCMD);
+	this.sendCmd(gcodeCMD);
+}

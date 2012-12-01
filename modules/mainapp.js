@@ -15,11 +15,12 @@ var dl = new downloadr.Downloader();
 printercore.setCbAfterOpenPrinter(function () { console.log('Printer initialization completed'); });
 // try interface without real 3d printer by using /dev/null
 printercore.setConfigPrinter({serialport: "/dev/null", baudrate: 115200});
-//printercore.setConfigPrinter({serialport: "/dev/tty.usbmodem622", baudrate: 115200}); 
-printercore.initializePrinter();
+//printercore.setConfigPrinter({serialport: "/dev/tty.usbmodem621", baudrate: 115200}); 
 
 // or (with 3d printer hardware) - alternative init method with args
 //printercore.initializePrinter({serialport: "/dev/tty.usbmodem622", baudrate: 115200});
+
+printercore.initializePrinter();
 
 //------------------------------------------------------------------
 // public functions

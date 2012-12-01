@@ -77,7 +77,7 @@ http://mbed.org/users/botdream/code/3dprinter_usbserialport_emulator/
 Also using /dev/null interface for dummy tests.
 
 License
-=======
+----------------------
 Copyright (C) 2012 Nelson Neves
 
 This program is free software: you can redistribute it and/or modify
