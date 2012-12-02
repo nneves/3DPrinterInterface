@@ -101,8 +101,10 @@ function spInitialize (iconfig) {
 	   	
 	   	if (data.indexOf("ok") != -1) {
 
+	   		//console.log('SPCB->OUTPUTSTREAM EMITDATA: ', data);
 	   		outputStream.emit('data', '<-'+data+'\r\n');
 
+	   		//console.log('SPCB->EMITEVENT sendGCodeBlockData');
 			// send event to trigger sendGCodeBlockData(..) function
 			evnt.emit('sendGCodeBlockData', gcodedata);
 		}
@@ -134,6 +136,13 @@ function spWrite (cmd) {
 	if (cmd.charAt(cmd.length-1) != '\n')
 		endchar = '\n';
 
+	// verify if inline comments are present, if so splits data to recover valid gcode
+	var array_cmd = cmd.split(";");
+	if (array_cmd.length > 0) {
+		console.log('Removing inline comments');
+		cmd = array_cmd[0];
+	}
+
 	console.log('->'+cmd+endchar);
 
 	// writes data to serialport
@@ -145,7 +154,7 @@ function spWrite (cmd) {
 
 		setTimeout(function () {
 
-			outputStream.emit('data', '<--ok\r\n\r\n');
+			outputStream.emit('data', '<-ok\r\n\r\n');
 			
 			console.log('SerialPort simulated callback response (/dev/null): ok\r\n');
 
@@ -244,11 +253,13 @@ function sendGCodeBlockData (igcodedata) {
 	  	igcodedata.sp_queue_current = 0;	
 	  	//console.log('GCode ReadStream Resume\r\n');
 	  	//igcodedata.readablestream.resume();	
+
+	  	//console.log('INPUTSTREAM->EMITDRAIN');
 	  	inputStream.emit('drain');
 	  	return;	
 	}
 
-	//console.log(igcodedata.array_block[igcodedata.sp_queue_current]);
+	//console.log('sendGCodeBlockData WriteSP: ', igcodedata.array_block[igcodedata.sp_queue_current]);
 	spWrite(igcodedata.array_block[igcodedata.sp_queue_current]);
 	igcodedata.sp_queue_current += 1;	
 
