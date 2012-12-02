@@ -6,6 +6,7 @@
 ChangeLog
 ---------
 Status: Initial structure ideia ... still a long way to go!
+Draft: https://www.lucidchart.com/documents/view/4f5c-1f6c-50baa492-9d74-10150a442276
 
 * Update1 (06-Nov-2012): 
 Initial ./modules/core.js module is now working with writable stream interface, serialport communication support completed and also internal minimal cache/stream data parser engine in place.
@@ -27,7 +28,6 @@ $ npm update
 ```bash
 $ node app.js
 ```
-
 
 Testing core.js module via command line
 ----------------------
