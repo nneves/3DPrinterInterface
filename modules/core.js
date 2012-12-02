@@ -139,14 +139,14 @@ function spWrite (cmd) {
 	// verify if inline comments are present, if so splits data to recover valid gcode
 	var array_cmd = cmd.split(";");
 	if (array_cmd.length > 0) {
-		console.log('Removing inline comments');
+		//console.log('Removing inline comments');
 		cmd = array_cmd[0];
 	}
 
 	console.log('->'+cmd+endchar);
 
 	// writes data to serialport
-	sp.write(cmd+endchar);
+	sp.write(cmd.trim()+endchar);
 
 	// normal conditions: serialport (cnc/reprap/3dprinter) will responde 'ok' and sp.on("data"...) is triggered
 	// special condition: /dev/null needs to emulate serialport callback (using setTimeout for additional delay)
