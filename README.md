@@ -37,7 +37,7 @@ The ./modules/core.js base module is responsible for managing all the 3D Printer
 Install project npm package dependencies:
 
 ```bash
-npm install
+npm update
 ```
 
 1- send gcode data to printer from file using command line ARGUMENTS
@@ -69,12 +69,14 @@ node appcmd.js
 
 3d Printers/electronic boards/microcontrollers tested hardware
 ----------------------
-Currently testing with R2C2 electronic board from this project: https://github.com/nneves/R2C2_WebInterface
+* Currently using an Ultimaker 3d printer
 
-Using MBED microcontroller (could also use an Arduino) for a 3d printer emulator (without any logic, just receives USB serialport data and responds back with an 'ok' when it finds and ENTER - no gcode validation nor other logic):
+* Also testing with R2C2 electronic board from this project: https://github.com/nneves/R2C2_WebInterface
+
+* Using MBED microcontroller (could also use an Arduino) for a 3d printer emulator (without any logic, just receives USB serialport data and responds back with an 'ok' when it finds and ENTER - no gcode validation nor other logic):
 http://mbed.org/users/botdream/code/3dprinter_usbserialport_emulator/
 
-Also using /dev/null interface for dummy tests.
+* Also using /dev/null interface for dummy tests.
 
 License
 ----------------------
