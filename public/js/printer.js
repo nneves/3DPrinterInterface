@@ -104,6 +104,11 @@ PRINTER.WebInterface.prototype.generateGCODE = function (posx, posy, posz, feedr
 	return igcode;
 };
 
+PRINTER.WebInterface.prototype.moveHome = function() {
+
+	this.sendCmd('G28');
+}
+
 PRINTER.WebInterface.prototype.moveXPlus = function(jogvalue, feedrate) {
 
 	var gcodeCMD = this.generateGCODE(jogvalue, 0, 0, feedrate);
