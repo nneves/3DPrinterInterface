@@ -141,6 +141,10 @@ function spWrite (cmd) {
 	if (array_cmd.length > 0) {
 		//console.log('Removing inline comments');
 		cmd = array_cmd[0];
+
+		// check if the command is empty
+		if (cmd.trim().length == 0)
+			cmd = " G4 P10"; // do nothing for 10 ms
 	}
 
 	console.log('->'+cmd+endchar);
