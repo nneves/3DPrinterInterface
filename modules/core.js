@@ -18,7 +18,7 @@ var stream = require('stream'),
 
 // lower level stream - hardware
 var JSONStream = require('json-stream'),
-	jsonstream = new JSONStream();
+	jsonStream = new JSONStream();
 
 iStream.writable = true;
 oStream.readble = true;
@@ -136,7 +136,7 @@ function spWrite (cmd) {
 			//console.log('[core.js]: SerialPort simulated callback response (/dev/null): ok\r\n');
 			spCBResponse("ok\n");
 
-		}, 100 );
+		}, 5000 );
 	}
 
 	return true;
@@ -164,9 +164,9 @@ function spCBResponse (data) {
 	//       non "ok" messages and send them to the upper layers for status tracking.
 };
 
-jsonstream.on('data', function (dlines) {
+jsonStream.on('data', function (dlines) {
 	
-	//console.log('JSONSTREAM: ', dlines);
+	console.log('[core.js]:JSONSTREAM: ', dlines);
  	lines_counter++;
 
 	//setTimeout(function () {
@@ -213,7 +213,8 @@ iStream.write = function (data) {
 			//console.log('CATCH JSON PARSE');
 			cmd = {"gcode": array_block[i]};
 		}
-		jsonstream.emit('data', cmd);
+		console.log("[core.js]:iStream: emit:data: ", cmd);
+		jsonStream.emit('data', cmd);
 	}		
   	//return true // true means 'yes i am ready for more data now'
   	// OR return false and emit('drain') when ready later	
@@ -235,6 +236,7 @@ module.exports = {
 	initializePrinter: spInitialize,
 	setCbAfterOpenPrinter: spSetCbAfterOpen,
 	iStreamPrinter: iStream,
-	oStreamPrinter: oStream
+	oStreamPrinter: oStream,
+	cmdStreamPrinter: jsonStream
 };
 //------------------------------------------------------------------

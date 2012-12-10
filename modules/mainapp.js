@@ -28,7 +28,8 @@ printercore.initializePrinter();
 //------------------------------------------------------------------
 function sendPrinterCmd (data) {
 	
-	var result = printercore.iStreamPrinter.write(data);
+	var jsoncmd = {"gcode": data};
+	var result = printercore.cmdStreamPrinter.emit('data', jsoncmd);
 	//printercore.oStreamPrinter.pipe(process.stdout);
 
 	// inputStream will return false, only after processing data 
