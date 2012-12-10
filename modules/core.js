@@ -155,7 +155,7 @@ function spCBResponse (data) {
 	if (data.indexOf("ok") != -1) {
 		lines_counter--;
 
-	console.log('[core.js]:JSONSTREAM:countlines ', lines_counter);	
+		console.log('[core.js]:JSONSTREAM:countlines ', lines_counter);	
 
 		var rescmd = {"response":idata};
 		oStream.emit('data', JSON.stringify(rescmd)+'\r\n\r\n');

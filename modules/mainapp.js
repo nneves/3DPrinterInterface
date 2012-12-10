@@ -12,6 +12,8 @@ var config = {},
 //------------------------------------------------------------------
 var dl = new downloadr.Downloader(); 
 
+printercore.oStreamPrinter.pipe(process.stdout);
+
 printercore.setCbAfterOpenPrinter(function () { console.log('Printer initialization completed'); });
 // try interface without real 3d printer by using /dev/null
 printercore.setConfigPrinter({serialport: "/dev/null", baudrate: 115200});
@@ -52,7 +54,7 @@ function sendPrinterFilename (filename) {
 	});
 
 	readableStream.pipe(printercore.iStreamPrinter);
-	printercore.oStreamPrinter.pipe(process.stdout);
+	//printercore.oStreamPrinter.pipe(process.stdout);
 
 	// true -> request/call accepted with success, any other errors originated from 
 	// the asynchronous requests must be reported to the origin via other channels
