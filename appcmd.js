@@ -33,6 +33,7 @@ core.setCbAfterOpenPrinter(main);
 // try interface without real 3d printer by using /dev/null
 core.setConfigPrinter({serialport: "/dev/null", baudrate: 115200});
 //core.setConfigPrinter({serialport: "/dev/tty.usbmodem621", baudrate: 115200});
+//core.setConfigPrinter({serialport: "/dev/tty.usbmodem622", baudrate: 115200});
 
 // or (with 3d printer hardware) - alternative init method with args
 //core.initializePrinter({serialport: "/dev/tty.usbmodem621", baudrate: 115200});
@@ -50,15 +51,15 @@ function main () {
 	if (path !==undefined ) {
 		readableStream = fs.createReadStream(path, {'bufferSize': 1 * 256});
 		readableStream.setEncoding('utf8');
-		readableStream.pipe(core.inputStreamPrinter);
-		core.outputStreamPrinter.pipe(process.stdout);
+		readableStream.pipe(core.iStreamPrinter);
+		core.oStreamPrinter.pipe(process.stdout);
 	}
 	else {
 		console.log("Get stream from STDIN pipe...");
 		// http://docs.nodejitsu.com/articles/advanced/streams/how-to-use-stream-pipe
 
 		process.stdin.setEncoding('utf8');
-		process.stdin.pipe(core.inputStreamPrinter, { end: false });
-		core.outputStreamPrinter.pipe(process.stdout);
+		process.stdin.pipe(core.iStreamPrinter, { end: false });
+		core.oStreamPrinter.pipe(process.stdout);
 	}
 }

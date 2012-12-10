@@ -15,7 +15,8 @@ var dl = new downloadr.Downloader();
 printercore.setCbAfterOpenPrinter(function () { console.log('Printer initialization completed'); });
 // try interface without real 3d printer by using /dev/null
 printercore.setConfigPrinter({serialport: "/dev/null", baudrate: 115200});
-//printercore.setConfigPrinter({serialport: "/dev/tty.usbmodem621", baudrate: 115200}); 
+//printercore.setConfigPrinter({serialport: "/dev/tty.usbmodem621", baudrate: 115200});
+//printercore.setConfigPrinter({serialport: "/dev/tty.usbmodem622", baudrate: 115200});
 
 // or (with 3d printer hardware) - alternative init method with args
 //printercore.initializePrinter({serialport: "/dev/tty.usbmodem622", baudrate: 115200});
@@ -27,8 +28,12 @@ printercore.initializePrinter();
 //------------------------------------------------------------------
 function sendPrinterCmd (data) {
 	
-	var result = printercore.writePrinter(data);
-	return result;
+	var result = printercore.iStreamPrinter.write(data);
+	//printercore.oStreamPrinter.pipe(process.stdout);
+
+	// inputStream will return false, only after processing data 
+	// will the drain even be triggered, only at that time it would return true
+	return true;
 }
 
 function sendPrinterFilename (filename) {
@@ -45,10 +50,10 @@ function sendPrinterFilename (filename) {
 		// error triggered asynchronously, need to report back to the origin of the request
 	});
 
-	readableStream.pipe(printercore.inputStreamPrinter);
-	printercore.outputStreamPrinter.pipe(process.stdout);
+	readableStream.pipe(printercore.iStreamPrinter);
+	printercore.oStreamPrinter.pipe(process.stdout);
 
-	// true -> request/call accepted with success, any other errors orginated from 
+	// true -> request/call accepted with success, any other errors originated from 
 	// the asynchronous requests must be reported to the origin via other channels
 	return true; 
 }
