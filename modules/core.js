@@ -104,8 +104,10 @@ function verifyUpdateConfig (iconfig) {
 
 function spWrite (cmd) {
 	
-	if (cmd === undefined || cmd.length == 0)
+	if (cmd === undefined || cmd.length == 0) {
+		spCBResponse("invalid_cmd\n");
 		return false;
+	}
 	
 	// verifiy if cmd last char equals to '\n'
 	var endchar = '';
@@ -136,7 +138,7 @@ function spWrite (cmd) {
 			//console.log('[core.js]: SerialPort simulated callback response (/dev/null): ok\r\n');
 			spCBResponse("ok\n");
 
-		}, 5000 );
+		}, 1000 );
 	}
 
 	return true;
@@ -153,6 +155,8 @@ function spCBResponse (data) {
 	if (data.indexOf("ok") != -1) {
 		lines_counter--;
 
+	console.log('[core.js]:JSONSTREAM:countlines ', lines_counter);	
+
 		var rescmd = {"response":idata};
 		oStream.emit('data', JSON.stringify(rescmd)+'\r\n\r\n');
 
@@ -160,6 +164,10 @@ function spCBResponse (data) {
 		if (lines_counter <= 0)
 			iStream.emit('drain');
 	}
+	else if (data.indexOf("invalid_cmd") != -1) {
+		lines_counter--;
+	}
+
 	// TODO: need to map printer initialization/error/temperature/other 
 	//       non "ok" messages and send them to the upper layers for status tracking.
 };
@@ -168,6 +176,7 @@ jsonStream.on('data', function (dlines) {
 	
 	console.log('[core.js]:JSONSTREAM: ', dlines);
  	lines_counter++;
+	console.log('[core.js]:JSONSTREAM:countlines ', lines_counter);	
 
 	//setTimeout(function () {
 
