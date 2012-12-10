@@ -164,7 +164,13 @@ function spCBResponse (data) {
 		if (lines_counter <= 0)
 			iStream.emit('drain');
 	}
-	else if (data.indexOf("invalid_cmd") != -1) {
+	else if (data.indexOf("invalid_cmd") != -1) {  // future implementation
+		lines_counter--;
+
+		var rescmd = {"error":idata};
+		oStream.emit('data', JSON.stringify(rescmd)+'\r\n\r\n');		
+	}
+	else if (data.indexOf("empty_cmd") != -1) {
 		lines_counter--;
 
 		var rescmd = {"error":idata};
