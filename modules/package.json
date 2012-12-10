@@ -5,7 +5,9 @@
   "dependencies": {
     "union": "0.3.0",
     "flatiron": "0.2.8",
-    "serialport": "1.0.4"
+    "serialport": "1.0.4",
+    "request": "2.12.0",
+    "json-stream": "0.1.2"
   },
   "devDependenices": {
     "api-easy": "0.3.2",
