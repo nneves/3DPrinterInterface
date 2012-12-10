@@ -125,7 +125,7 @@ function spWrite (cmd) {
 			cmd = " G4 P10"; // do nothing for 10 ms
 	}
 
-	console.log('[core.js]:spWrite() ->'+cmd+endchar);
+	console.log('[core.js]:spWrite() -> '+cmd+endchar);
 
 	// writes data to serialport
 	sp.write(cmd.trim()+endchar);
@@ -150,12 +150,12 @@ function spCBResponse (data) {
 	var idata = data.replace(/\r/g, "");
 		idata = idata.replace(/\n/g, "");
 
-	console.log("[core.js]:[Board_TX]->[Node.JS_RX]: %s\r\n", idata);
+	//console.log("[core.js]:[Board_TX]->[Node.JS_RX]: %s\r\n", idata);
    	
 	if (data.indexOf("ok") != -1) {
 		lines_counter--;
 
-		console.log('[core.js]:JSONSTREAM:countlines ', lines_counter);	
+		//console.log('[core.js]:JSONSTREAM:countlines ', lines_counter);	
 
 		var rescmd = {"response":idata};
 		oStream.emit('data', JSON.stringify(rescmd)+'\r\n\r\n');
@@ -166,6 +166,13 @@ function spCBResponse (data) {
 	}
 	else if (data.indexOf("invalid_cmd") != -1) {
 		lines_counter--;
+
+		var rescmd = {"error":idata};
+		oStream.emit('data', JSON.stringify(rescmd)+'\r\n\r\n');		
+	}
+	else {
+		var rescmd = {"printer":idata};
+		oStream.emit('data', JSON.stringify(rescmd)+'\r\n\r\n');				
 	}
 
 	// TODO: need to map printer initialization/error/temperature/other 
@@ -174,16 +181,12 @@ function spCBResponse (data) {
 
 jsonStream.on('data', function (dlines) {
 	
-	console.log('[core.js]:JSONSTREAM: ', dlines);
+	//console.log('[core.js]:JSONSTREAM: ', dlines);
  	lines_counter++;
-	console.log('[core.js]:JSONSTREAM:countlines ', lines_counter);	
-
-	//setTimeout(function () {
+	//console.log('[core.js]:JSONSTREAM:countlines ', lines_counter);	
 
 	//send gcode data to serial port
 	spWrite(dlines.gcode);
-	
-	//}, 3000 );
 });
 
 iStream.write = function (data) {
@@ -222,7 +225,7 @@ iStream.write = function (data) {
 			//console.log('CATCH JSON PARSE');
 			cmd = {"gcode": array_block[i]};
 		}
-		console.log("[core.js]:iStream: emit:data: ", cmd);
+		//console.log("[core.js]:iStream: emit:data: ", cmd);
 		jsonStream.emit('data', cmd);
 	}		
   	//return true // true means 'yes i am ready for more data now'
@@ -233,7 +236,7 @@ iStream.write = function (data) {
 iStream.end = function (data) {
   // no more writes after end
   // emit "close" (optional)
-  console.log("[Core.js]: Close inputStream!");
+  // console.log("[Core.js]: Close inputStream!");
   this.emit('close');
 };
 
