@@ -105,7 +105,7 @@ function verifyUpdateConfig (iconfig) {
 function spWrite (cmd) {
 	
 	if (cmd === undefined || cmd.length == 0) {
-		spCBResponse("invalid_cmd\n");
+		spCBResponse("empty_cmd\n");
 		return false;
 	}
 	
