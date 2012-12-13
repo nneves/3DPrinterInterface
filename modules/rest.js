@@ -5,6 +5,10 @@ var flatiron = require('flatiron'),
     config = {tcpPort: 8081},
     mainapp = require('./mainapp.js');
 
+// lower level stream - hardware
+var JSONStream = require('json-stream'),
+	jsonStream = new JSONStream();
+
 //------------------------------------------------------------------
 // initialization
 //------------------------------------------------------------------
@@ -17,6 +21,9 @@ app.use(flatiron.plugins.http);
 
 // using flatiron
 app.router.configure({"notfound":noroutingfound});
+
+// pipe core.js->oStream to a json-stream
+mainapp.outputStreamPrinter.pipe(jsonStream);
 
 //------------------------------------------------------------------
 // routing
@@ -42,6 +49,15 @@ console.log('3D Printer REST-API Server running on port '+config.tcpPort);
 //------------------------------------------------------------------
 // functions
 //------------------------------------------------------------------
+
+jsonStream.on('data', function (dlines) {
+	
+	//console.log('[rest.js]:JSONSTREAM: ', dlines);
+
+	// manual mapping: printer
+    if (dlines.printer !== undefined)
+		console.log("[rest.js]:JSONSTREAM:printer: ", dlines.printer);
+});
 
 function help () {
 

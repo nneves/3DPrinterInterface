@@ -12,6 +12,7 @@ var config = {},
 //------------------------------------------------------------------
 var dl = new downloadr.Downloader(); 
 
+// for debug purpose only - output core.js oStream data messages
 printercore.oStreamPrinter.pipe(process.stdout);
 
 printercore.setCbAfterOpenPrinter(function () { console.log('Printer initialization completed'); });
@@ -102,7 +103,8 @@ function downloadUrl (url, destpath) {
 module.exports = {
 	setConfig: setConfig,
 	sendPrinterCmd: sendPrinterCmd,
-	sendPrinterFilename: sendPrinterFilename
+	sendPrinterFilename: sendPrinterFilename,
+	outputStreamPrinter: printercore.oStreamPrinter
 };
 //------------------------------------------------------------------
 // demo: ...

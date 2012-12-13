@@ -160,6 +160,11 @@ function spCBResponse (data) {
 		var rescmd = {"response":idata};
 		oStream.emit('data', JSON.stringify(rescmd)+'\r\n\r\n');
 
+//NOTE: printer temperature data will be triggered in the 'ok' switch
+//		{"response":"ok T:18.8 /0.0 B:0.0 /0.0 @:0"}
+//		need to implement a special case with regex to test this 
+//		specific response and warp it in a {"temperture":idata}; 
+
 		// verify if it can 'drain' the iStream
 		if (lines_counter <= 0)
 			iStream.emit('drain');
