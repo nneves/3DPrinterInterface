@@ -7,7 +7,8 @@
     "flatiron": "0.2.8",
     "serialport": "1.0.4",
     "request": "2.12.0",
-    "json-stream": "0.1.2"
+    "json-stream": "0.1.2",
+    "socket.io": "0.9.10"
   },
   "devDependenices": {
     "api-easy": "0.3.2",

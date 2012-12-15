@@ -12,21 +12,58 @@ var printer = PRINTER.WebInterface();
 //-----------------------------------------------------------------------------
 var PRINTER = {};
 //-----------------------------------------------------------------------------
-PRINTER.WebInterface = function () {
+PRINTER.WebInterface = function (cbPrinterMessage) {
 	//var printer = PRINTER.WebInterface();	
 	if(!(this instanceof arguments.callee)) {
 		console.log("Auto create and return object!");
-		return new arguments.callee();
+		return new arguments.callee(cbPrinterMessage);
 	}	
 	console.log("Creating PRINTER.WebInterface object.");
 
 	this.initRelativeMoveCmd();
+
+	//socketio
+	this.socket;
+	this.initSocketio(window.location.host, 8081); // rest.js API module
+	if (this.socket !== undefined)
+		this.socket.emit('clientmsg', { wsdata: "HelloAgain!" });
+
+	this.pPrinterMessage = cbPrinterMessage;
+	if (this.pPrinterMessage !== undefined)
+		this.pPrinterMessage('Initialized PRINTER.WebInterface');
+
 };
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 // Public - PRINTER namespace Scope
 //-----------------------------------------------------------------------------	
+
+PRINTER.WebInterface.prototype.initSocketio = function (ip, port) {
+
+	var self = this;
+    if (typeof io !== "undefined") {
+
+    	// remove original port (when using ip=window.location.host port is not correct)
+    	var array_ip = ip.split(":");
+		if (array_ip.length > 0)
+			ip = array_ip[0];
+
+    	var server_addr = 'http://'+ip+':'+port;
+    	console.log("Connecting to Socketio server: ", server_addr);
+    	this.socket = io.connect(server_addr);
+
+		var inlinefunc = function (self) {
+			return function(serverdata) {
+	        	console.log('Received server message with data: '+serverdata.data);
+	        	if (self.pPrinterMessage !== undefined)
+	        		self.pPrinterMessage(serverdata.data);
+			};
+		};
+    	this.socket.on('servermsg', inlinefunc(this));
+    }
+};
+
 PRINTER.WebInterface.prototype.sendCmd = function (cmd) {
 
 	var sendReq = this._getXHRObject();	

@@ -29,6 +29,9 @@ app.http.before = [
 // http proxy rules - valid for all /api requests
 app.router.get(/api\/((\w|.)*)/, requestProxy);
 
+// socketio resource: socket.io.js provided from socket.io itself (rest.js)
+app.router.get(/socket.io\/((\w|.)*)/, requestProxy);
+
 // launch app on tcpoprt
 app.start(tcpport);
 console.log('3D Printer WebInterface Server running on port '+tcpport);

@@ -63,8 +63,16 @@ a {
 .block06 {
   position:absolute;
   left:60px;
-  top:450px; 
+  top:456px; 
   width:400px;
+}
+
+.block07 {
+  position:absolute;
+  left:460px;
+  top:280px; 
+  width:400px;
+  height:210px;
 }
 
 .xplus {

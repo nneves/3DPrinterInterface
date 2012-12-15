@@ -9,6 +9,10 @@ var flatiron = require('flatiron'),
 var JSONStream = require('json-stream'),
 	jsonStream = new JSONStream();
 
+// socket.io - WebSockets communication channel to client
+// used to broadcast printer mapped messages (temp, errors, etc)
+var socketio;
+
 //------------------------------------------------------------------
 // initialization
 //------------------------------------------------------------------
@@ -46,6 +50,25 @@ app.router.get(/api\/sendprinterfilename\/((\w|.)*)/, sendPrinterFilename);
 app.start(config.tcpPort);
 console.log('3D Printer REST-API Server running on port '+config.tcpPort);
 
+console.log('Launch/bind Soket.io WebSockets server');
+socketio = require('socket.io').listen(app.server)
+
+//------------------------------------------------------------------
+// Socket.io
+//------------------------------------------------------------------
+socketio.sockets.on('connection', function(socket) {
+
+	socket.on('clientmsg', function(data) {
+    	console.log('Received client message with data: '+data.wsdata);
+
+    	// broadcast to all clients (exluding the origin client)
+    	//socket.broadcast.emit('servermsg', { data: "I recieved your message: "+data.wsdata});
+
+    	//send message to client
+    	socket.emit('servermsg', { data: "I recieved your message: "+data.wsdata});
+	});
+});	
+
 //------------------------------------------------------------------
 // functions
 //------------------------------------------------------------------
@@ -55,8 +78,10 @@ jsonStream.on('data', function (dlines) {
 	//console.log('[rest.js]:JSONSTREAM: ', dlines);
 
 	// manual mapping: printer
-    if (dlines.printer !== undefined)
+    if (dlines.printer !== undefined) {
 		console.log("[rest.js]:JSONSTREAM:printer: ", dlines.printer);
+		socketio.sockets.emit('servermsg', { data: dlines.printer});
+	}
 });
 
 function help () {

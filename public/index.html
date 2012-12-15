@@ -46,10 +46,19 @@
       <button id="btnFileStream" type="button" onClick="printer.sendFilename(gcodefs.value)">Send to Printer</button><br><br>
     </div>
 
-<!--<script src="js/printer.js"></script>-->
+    <div id="block07" class="block07">
+      <p>Printer Messages</p>
+      <textarea id="textPrinterMsg" rows="13" cols="53"></textarea>
+    </div> 
+
+  <script src="/socket.io/socket.io.js"></script>
   <script type="text/javascript" src="js/printer.js"></script>
   <script type="text/javascript">
-    var printer = PRINTER.WebInterface();
+    var oPrinterMessage = document.getElementById('textPrinterMsg');
+    var cbPrinterMessage = function (data) {
+      oPrinterMessage.value += data+'\r\n';
+    }
+    var printer = PRINTER.WebInterface(cbPrinterMessage);
   </script>
 	</body>
 </html>
