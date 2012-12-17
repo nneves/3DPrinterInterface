@@ -12,6 +12,9 @@ var JSONStream = require('json-stream'),
 // socket.io - WebSockets communication channel to client
 // used to broadcast printer mapped messages (temp, errors, etc)
 var socketio;
+// cache printer messages until 1st client connects
+var flagCachePrinterMsg = true;
+var arrayCachePrinterMsg = [];
 
 //------------------------------------------------------------------
 // initialization
@@ -67,6 +70,18 @@ socketio.sockets.on('connection', function(socket) {
     	//send message to client
     	socket.emit('servermsg', { data: "I recieved your message: "+data.wsdata});
 	});
+
+	// on 1s connection, emits cached printer array to jsonstream
+	if (flagCachePrinterMsg) {
+
+		flagCachePrinterMsg = false;
+		var cmd;
+		while (arrayCachePrinterMsg.length > 0) {
+			cmd = arrayCachePrinterMsg.shift();
+			console.log("[rest.js]:sockeio.OnConnection:jsonstream.emit: ", cmd);
+			jsonStream.emit('data', cmd);
+		}
+	}
 });	
 
 //------------------------------------------------------------------
@@ -74,13 +89,22 @@ socketio.sockets.on('connection', function(socket) {
 //------------------------------------------------------------------
 
 jsonStream.on('data', function (dlines) {
-	
-	//console.log('[rest.js]:JSONSTREAM: ', dlines);
 
-	// manual mapping: printer
-    if (dlines.printer !== undefined) {
-		console.log("[rest.js]:JSONSTREAM:printer: ", dlines.printer);
-		socketio.sockets.emit('servermsg', { data: dlines.printer});
+	if (flagCachePrinterMsg) {
+		console.log('[rest.js]:JSONSTREAM:arrayCachePrinterMsg: ', dlines);
+
+		// add the complete json object to the cache array
+		// when 1st client connects will emmit full object to the jsonstream
+		arrayCachePrinterMsg.push(dlines);
+	}
+	else {
+		console.log('[rest.js]:JSONSTREAM:socketio.emit: ', dlines);
+
+		// manual mapping: printer
+	    if (dlines.printer !== undefined) {
+			console.log("[rest.js]:JSONSTREAM:printer: ", dlines.printer);
+			socketio.sockets.emit('servermsg', { data: dlines.printer});
+		}
 	}
 });
 

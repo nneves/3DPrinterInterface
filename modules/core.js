@@ -73,6 +73,9 @@ function spInitialize (iconfig) {
         else {
         	console.log("[core.js]: No SerialPort After Open callback defined!");
         }
+
+        // calling printer emulator initializaion messages when using /dev/null
+        emulatePrinterInitMsg();
 	});
 };
 
@@ -188,6 +191,20 @@ function spCBResponse (data) {
 
 	// TODO: need to map printer initialization/error/temperature/other 
 	//       non "ok" messages and send them to the upper layers for status tracking.
+};
+
+function emulatePrinterInitMsg () {
+
+	//emulater printer initial messages when unsing /dev/null
+	if (config.serialport.toUpperCase() === '/DEV/NULL') {
+
+		setTimeout(function () {
+			console.log('[core.js]:emulatePrinterInitMsg\r\n');
+			spCBResponse("printer: 3D Printer Initialization Messages\n");
+			spCBResponse("printer: Emulated printer is ready!\n");
+
+		}, 1000 );
+	}
 };
 
 jsonStream.on('data', function (dlines) {
