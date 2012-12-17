@@ -25,8 +25,8 @@ PRINTER.WebInterface = function (cbPrinterMessage) {
 	//socketio
 	this.socket;
 	this.initSocketio(window.location.host, 8081); // rest.js API module
-	if (this.socket !== undefined)
-		this.socket.emit('clientmsg', { wsdata: "HelloAgain!" });
+	//if (this.socket !== undefined)
+	//	this.socket.emit('clientmsg', { wsdata: "HelloAgain!" });
 
 	this.pPrinterMessage = cbPrinterMessage;
 	if (this.pPrinterMessage !== undefined)

@@ -68,7 +68,7 @@ socketio.sockets.on('connection', function(socket) {
     	//socket.broadcast.emit('servermsg', { data: "I recieved your message: "+data.wsdata});
 
     	//send message to client
-    	socket.emit('servermsg', { data: "I recieved your message: "+data.wsdata});
+    	//socket.emit('servermsg', { data: "I recieved your message: "+data.wsdata});
 	});
 
 	// on 1s connection, emits cached printer array to jsonstream
