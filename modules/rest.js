@@ -105,6 +105,10 @@ jsonStream.on('data', function (dlines) {
 			console.log("[rest.js]:JSONSTREAM:printer: ", dlines.printer);
 			socketio.sockets.emit('servermsg', { data: dlines.printer});
 		}
+		else if (dlines.response !== undefined) {
+			console.log("[rest.js]:JSONSTREAM:response: ", dlines.response);
+			socketio.sockets.emit('servermsg', { data: dlines.response});
+		}
 	}
 });
 

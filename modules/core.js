@@ -141,7 +141,7 @@ function spWrite (cmd) {
 			//console.log('[core.js]: SerialPort simulated callback response (/dev/null): ok\r\n');
 			spCBResponse("ok\n");
 
-		}, 1000 );
+		}, 100 );
 	}
 
 	return true;
