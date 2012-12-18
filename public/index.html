@@ -47,7 +47,7 @@
     </div>
 
     <div id="block07" class="block07">
-      <p>Printer Messages</p>
+      <p id="lblPrinterMsg">Printer Messages:0</p>
       <textarea id="textPrinterMsg" rows="13" cols="53"></textarea>
     </div> 
 
@@ -55,11 +55,24 @@
   <script type="text/javascript" src="js/printer.js"></script>
   <script type="text/javascript">
     var oPrinterMessage = document.getElementById('textPrinterMsg');
-    var cbPrinterMessage = function (data) {
-      oPrinterMessage.value += data+'\r\n';
+    var lblPrinterMessage = document.getElementById('lblPrinterMsg');
+
+    var cbPrinterMessages = function (data) {
+      var datastring = JSON.stringify(data);
+      oPrinterMessage.value += datastring+'\r\n';
       oPrinterMessage.scrollTop = oPrinterMessage.value.length;
-    }
-    var printer = PRINTER.WebInterface(cbPrinterMessage);
+
+      var arrayLbl = lblPrinterMessage.innerHTML.split(":");
+      var counter = parseInt(arrayLbl[1],10);
+      counter += 1;
+      lblPrinterMessage.innerHTML = arrayLbl[0] + ":" + counter.toString();
+    } 
+  
+    var printer = PRINTER.WebInterface();
+    printer.cblist.response = cbPrinterMessages;
+    printer.cblist.printer = cbPrinterMessages;
+    printer.cblist.error = cbPrinterMessages;
+
   </script>
 	</body>
 </html>

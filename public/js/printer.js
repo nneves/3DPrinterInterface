@@ -12,11 +12,11 @@ var printer = PRINTER.WebInterface();
 //-----------------------------------------------------------------------------
 var PRINTER = {};
 //-----------------------------------------------------------------------------
-PRINTER.WebInterface = function (cbPrinterMessage) {
+PRINTER.WebInterface = function () {
 	//var printer = PRINTER.WebInterface();	
 	if(!(this instanceof arguments.callee)) {
 		console.log("Auto create and return object!");
-		return new arguments.callee(cbPrinterMessage);
+		return new arguments.callee();
 	}	
 	console.log("Creating PRINTER.WebInterface object.");
 
@@ -28,10 +28,9 @@ PRINTER.WebInterface = function (cbPrinterMessage) {
 	//if (this.socket !== undefined)
 	//	this.socket.emit('clientmsg', { wsdata: "HelloAgain!" });
 
-	this.pPrinterMessage = cbPrinterMessage;
-	if (this.pPrinterMessage !== undefined)
-		this.pPrinterMessage('Initialized PRINTER.WebInterface');
-
+	// callback object list for UI/frontend easy usage
+	// maps socket.io object and calls callback function(data)
+	this.cblist = {};
 };
 //-----------------------------------------------------------------------------
 
@@ -55,9 +54,16 @@ PRINTER.WebInterface.prototype.initSocketio = function (ip, port) {
 
 		var inlinefunc = function (self) {
 			return function(serverdata) {
-	        	console.log('Received server message with data: '+serverdata.data);
+	        	//console.log('Received server message with data: '+JSON.stringify(serverdata.data));
+	        	//console.log('->: ', serverdata.data);
 	        	if (self.pPrinterMessage !== undefined)
 	        		self.pPrinterMessage(serverdata.data);
+
+	        	// get serverdata.data object property, calls remote callback if defined
+	        	for (prop in serverdata.data) {
+		        	if (self.cblist[prop] !== undefined && typeof self.cblist[prop] === 'function')
+		        		self.cblist[prop](serverdata.data);
+	        	}
 			};
 		};
     	this.socket.on('servermsg', inlinefunc(this));
