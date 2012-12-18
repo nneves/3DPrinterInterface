@@ -57,6 +57,7 @@
     var oPrinterMessage = document.getElementById('textPrinterMsg');
     var cbPrinterMessage = function (data) {
       oPrinterMessage.value += data+'\r\n';
+      oPrinterMessage.scrollTop = oPrinterMessage.value.length;
     }
     var printer = PRINTER.WebInterface(cbPrinterMessage);
   </script>
