@@ -15,6 +15,7 @@ var socketio;
 // cache printer messages until 1st client connects
 var flagCachePrinterMsg = true;
 var arrayCachePrinterMsg = [];
+var arrayJSONmapping = ["printer","response","error"];
 
 //------------------------------------------------------------------
 // initialization
@@ -100,17 +101,23 @@ jsonStream.on('data', function (dlines) {
 	else {
 		console.log('[rest.js]:JSONSTREAM:socketio.emit: ', dlines);
 
-		// manual mapping: printer
+		// verify message property to check if its mapped to propagate
+		for (prop in dlines) {
+			console.log(prop);
+			dlines[prop]
+
+			// verify if property should be used 
+		    if (arrayJSONmapping.indexOf(prop) != -1) {
+				socketio.sockets.emit('servermsg', { data: dlines});
+			}			
+		}
+		// manual mapping: printer - not required, edit the arrayJSONmapping array to add mapping
+		/*
 	    if (dlines.printer !== undefined) {
 			console.log("[rest.js]:JSONSTREAM:printer: ", dlines.printer);
 			//socketio.sockets.emit('servermsg', { data: dlines.printer});
 			socketio.sockets.emit('servermsg', { data: dlines});
-		}
-		else if (dlines.response !== undefined) {
-			console.log("[rest.js]:JSONSTREAM:response: ", dlines.response);
-			//socketio.sockets.emit('servermsg', { data: dlines.response});
-			socketio.sockets.emit('servermsg', { data: dlines});
-		}
+		} */
 	}
 });
 
