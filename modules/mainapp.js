@@ -62,6 +62,32 @@ function sendPrinterFilename (filename) {
 	return true; 
 }
 
+function getFileList (filetype) {
+
+	var path;
+	if (filetype.toUpperCase() === "GCODE")
+		path = "/bin/gcode";
+	else if (filetype.toUpperCase() === "STL")
+		path = "/bin/stl";
+	else
+		return false;
+
+	listdir(process.cwd()+path, [filetype.toLowerCase()], function (data) {
+		
+		var jsoncmd;
+		if (filetype.toUpperCase() === "GCODE")
+			jsoncmd = {"filelistgcode": data};
+		else if (filetype.toUpperCase() === "STL")
+			jsoncmd = {"fileliststl": data};
+
+		console.log("[mainapp.js]:getFileList:"+path+": ", JSON.stringify(jsoncmd));
+		var result = printercore.oStreamPrinter.emit('data', JSON.stringify(jsoncmd)+'\r\n\r\n');
+	});        
+
+	// inputStream will return false, only after processing data 
+	// will the drain even be triggered, only at that time it would return true
+	return true;
+}
 //------------------------------------------------------------------
 // getters/setters functions
 //------------------------------------------------------------------
@@ -97,6 +123,68 @@ function downloadUrl (url, destpath) {
 	return true;
 }
 
+function listdir (path, extfilter, callback) {
+	// Assert that it's a function
+	if (typeof callback !== "function")
+		callback = function (datalist) { };
+
+	var datalist = [];
+	var counter = 0;
+
+	// remove last '/' from path
+	if (path.charAt(path.length-1) !== "/")
+		path += "/";
+
+	fs.readdir(path, function (err, list) { 
+		if (err) 
+			console.log("[mainapp.js]: Error while getting dir list: ", err);
+
+		//console.log("[mainapp.js]:List: ", list);
+		// For every file in the list
+    	list.forEach(function (file) {
+
+    		counter++;
+    		
+    		// Full path of that file
+    		var fullpath = path + file;
+    		//console.log("[mainapp.js]:File:", fullpath);
+
+    		// Get the file's stats
+    		fs.stat(fullpath, function (err, stat) {
+
+    			counter--;
+
+    			if (stat && stat.isDirectory()) {
+    				//console.log("[mainapp.js]:datalist:DIRECTORY:",fullpath);
+    			}
+    			else if (stat && stat.isFile()) {
+    				var filename = fullpath.substring(fullpath.lastIndexOf("/")+1,fullpath.length);
+    				var extension = fullpath.substring(fullpath.lastIndexOf(".")+1,fullpath.length);
+
+    				if (extfilter.length == 0 || extfilter.indexOf(extension) != -1) {
+
+    					// "filepath":fullpath, 
+	    				datalist.push({
+	    						"filename":filename,
+	    						"extension":extension,
+	    						"filesize":stat.size});
+    				}
+    			}
+    			if (counter == 0)
+    				callback(datalist);
+    		});
+    		
+    	});
+	});
+}
+/*
+listdir(process.cwd()+'/bin/gcode', ["gcode"], listdircallback);
+listdir(process.cwd()+'/bin/stl', ["stl"], listdircallback);
+
+function listdircallback (datalist) {
+	console.log("[mainapp.js]:datalistCB:COMPLETED", datalist);
+} */
+
 //------------------------------------------------------------------
 // export
 //------------------------------------------------------------------
@@ -104,6 +192,7 @@ module.exports = {
 	setConfig: setConfig,
 	sendPrinterCmd: sendPrinterCmd,
 	sendPrinterFilename: sendPrinterFilename,
+	getFileList: getFileList,
 	outputStreamPrinter: printercore.oStreamPrinter
 };
 //------------------------------------------------------------------

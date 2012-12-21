@@ -51,6 +51,11 @@
       <textarea id="textPrinterMsg" rows="13" cols="53"></textarea>
     </div> 
 
+    <div id="block08" class="block08">
+      <button id="btnFileListGCODE" type="button" onClick="printer.getFileListGCODE()">List GCODE files</button>
+      <button id="btnFileListSTL" type="button" onClick="printer.getFileListSTL()">List STL files</button>
+    </div>    
+
   <script src="/socket.io/socket.io.js"></script>
   <script type="text/javascript" src="js/printer.js"></script>
   <script type="text/javascript">
@@ -72,7 +77,8 @@
     printer.cblist.response = cbPrinterMessages;
     printer.cblist.printer = cbPrinterMessages;
     printer.cblist.error = cbPrinterMessages;
-
+    printer.cblist.filelistgcode = cbPrinterMessages;
+    printer.cblist.fileliststl = cbPrinterMessages;
   </script>
 	</body>
 </html>

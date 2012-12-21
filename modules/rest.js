@@ -15,7 +15,7 @@ var socketio;
 // cache printer messages until 1st client connects
 var flagCachePrinterMsg = true;
 var arrayCachePrinterMsg = [];
-var arrayJSONmapping = ["printer","response","error"];
+var arrayJSONmapping = ["printer","response","error","filelistgcode","fileliststl"];
 
 //------------------------------------------------------------------
 // initialization
@@ -43,6 +43,9 @@ app.router.get('/api', help);
 app.router.get(/api\/sendprintercmd\/((\w|.)*)/, sendPrinterCmd);
 
 app.router.get(/api\/sendprinterfilename\/((\w|.)*)/, sendPrinterFilename);
+
+app.router.get(/api\/getfilelistgcode\/((\w|.)*)/, getFileListGCODE);
+app.router.get(/api\/getfileliststl\/((\w|.)*)/, getFileListSTL);
 
 //app.router.get(/urldownload\/((\w|.)*)/, downloadUrl);
 
@@ -164,6 +167,28 @@ function sendPrinterCmd (data) {
 function sendPrinterFilename (filename) {
 
 	var result = mainapp.sendPrinterFilename(filename);
+	var response = {response: result};
+
+	// responding back to the brower request
+	this.res.writeHead(200, {'Content-Type':'application/json'});
+	this.res.write(JSON.stringify(response));
+	this.res.end();		
+}
+
+function getFileListGCODE () {
+
+	var result = mainapp.getFileList("GCODE");
+	var response = {response: result};
+
+	// responding back to the brower request
+	this.res.writeHead(200, {'Content-Type':'application/json'});
+	this.res.write(JSON.stringify(response));
+	this.res.end();		
+}
+
+function getFileListSTL () {
+
+	var result = mainapp.getFileList("STL");
 	var response = {response: result};
 
 	// responding back to the brower request

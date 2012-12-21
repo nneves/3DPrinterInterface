@@ -101,6 +101,37 @@ PRINTER.WebInterface.prototype.sendFilename = function (filename) {
 	}	
 };
 
+PRINTER.WebInterface.prototype.getFileListGCODE = function () {
+
+	// internal ajax request object
+	var sendReq = this._getXHRObject();	
+	var url_cmd = '/api/getfilelistgcode/';
+
+	if (sendReq.readyState == 4 || sendReq.readyState == 0) {
+		sendReq.open("GET",url_cmd,true);
+        sendReq.setRequestHeader('Accept','application/json');
+        sendReq.setRequestHeader('Content-Type','text/xml');
+		sendReq.onreadystatechange = this._XHRcallback(url_cmd);
+        console.log("-> XHR cmd["+url_cmd+"]");
+		sendReq.send(null);
+	}	
+};
+
+PRINTER.WebInterface.prototype.getFileListSTL = function () {
+
+	// internal ajax request object
+	var sendReq = this._getXHRObject();	
+	var url_cmd = '/api/getfileliststl/';
+
+	if (sendReq.readyState == 4 || sendReq.readyState == 0) {
+		sendReq.open("GET",url_cmd,true);
+        sendReq.setRequestHeader('Accept','application/json');
+        sendReq.setRequestHeader('Content-Type','text/xml');
+		sendReq.onreadystatechange = this._XHRcallback(url_cmd);
+        console.log("-> XHR cmd["+url_cmd+"]");
+		sendReq.send(null);
+	}	
+};
 //-----------------------------------------------------------------------------	
 
 //-----------------------------------------------------------------------------
