@@ -5,19 +5,44 @@
 
 ChangeLog
 ---------
-Status: Initial structure ideia ... still a long way to go!
-Draft: https://www.lucidchart.com/documents/view/4f5c-1f6c-50baa492-9d74-10150a442276
+Status: Core functionality is now in place (just missing a few minor stuff - configs, etc)
+UI interface still under development (at the moment there are only some basic test functionalities)
+
+* Update3 (31-Dec-2012)
+    - Added Socket.io for websockets communication (currently used to upload printer response to UI, should add support for bidirectional communication - will also maintain REST for API interface)
+    - Added support in printer.js UI Library to map local callbacks with Socket.io Event Messages for easy integration with UI components
+    - Fixed issues #2,#3,#4,#5,#6,#7,#8,#11
+
+* Update2 (29-Nov-2012): 
+    - Ported and re-factored R2C2 webinterface (including client javascript helper file)
+    - Added app.js code to deploy initial WebInterface for UI testing
+    - Added rest.js module code to deploy REST API
+    - Created mainapp.js to bind upper rest.js module requests with lower level modules (core.js serial communications module, slicer.js, downloader.js, etc)
 
 * Update1 (06-Nov-2012): 
 Initial ./modules/core.js module is now working with writable stream interface, serialport communication support completed and also internal minimal cache/stream data parser engine in place.
 
-* Update2 (29-Nov-2012): 
-	- Ported and re-factored R2C2 webinterface (including client javascript helper file)
-	- Added app.js code to deploy initial WebInterface for UI testing
-	- Added rest.js module code to deploy REST API
-	- Created mainapp.js to bind upper rest.js module requests with lower level modules (core.js serial communications module, slicer.js, downloader.js, etc)
+TODO
+----
+    - Completlety redesign the frontend UI and add extra functionalities
+    - Refactor core module configurations to use config/*.json files
+    - Create documentation for UI implementation
+    - Create documentation to explain core modules communication/workflow
+
+Techincal Specs initial draft (work in progress)
+-----------------------------
+https://www.lucidchart.com/documents/view/4f5c-1f6c-50baa492-9d74-10150a442276
+
+How to test 3DPI
+----------------
 
 It is now possible to test the WebInterface and send a simple GCODE command to printer. There is also an initial support to print data from .gcode files located at /bin/gcode/ .
+
+// clone repo
+```bash
+$ git clone git://github.com/nneves/3DPrinterInterface.git
+$ cd 3DPrinterInterface
+```
 
 // update node required packages
 ```bash
@@ -27,44 +52,6 @@ $ npm update
 // launch demo WebInterface (will run on port 8080, REST API on 8081 and using /dev/null to emulate printer serial port - printer response emulated by timer)
 ```bash
 $ node app.js
-```
-
-Testing core.js module via command line
-----------------------
-
-The ./modules/core.js base module is responsible for managing all the 3D Printer configurations/communication and abstract all the underlaying functionality in a usable generic stream interface. To test this initial work there is a simple appcmd.js file with the minimal necessary required configurations to launch a simple 3d printer interface that can receive GCODE data from file/stream/STDIN and start printing the 3d object.
-
-Install project npm package dependencies:
-
-```bash
-npm update
-```
-
-1- send gcode data to printer from file using command line ARGUMENTS
-
-```bash
-node appcmd.js ./bin/gcode/demo.gcode
-```
-
-2- send gcode data to printer from STDIN pipe (file content stream using cat)
-
-```bash
-cat ./bin/gcode/demo.gcode | node appcmd.js
-```
-
-3- send gcode data to printer from STDIN: manual GCODE data insert on the console + ENTER (interactive/manual control)
-
-```bash
-node appcmd.js
-
-(enter commands): 
-// M104 S200\n
-// G28\n
-// G90\n
-// G21\n
-// G92\n
-// M82\n
-// G1 Z0.200 F7800.000\n
 ```
 
 3d Printers/electronic boards/microcontrollers tested hardware
