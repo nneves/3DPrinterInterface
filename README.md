@@ -13,11 +13,13 @@ UI interface still under development (at the moment there are only some basic te
     - Added support in printer.js UI Library to map local callbacks with Socket.io Event Messages for easy integration with UI components
     - Fixed issues #2,#3,#4,#5,#6,#7,#8,#11
 
+
 * Update2 (29-Nov-2012): 
     - Ported and re-factored R2C2 webinterface (including client javascript helper file)
     - Added app.js code to deploy initial WebInterface for UI testing
     - Added rest.js module code to deploy REST API
     - Created mainapp.js to bind upper rest.js module requests with lower level modules (core.js serial communications module, slicer.js, downloader.js, etc)
+
 
 * Update1 (06-Nov-2012): 
 Initial ./modules/core.js module is now working with writable stream interface, serialport communication support completed and also internal minimal cache/stream data parser engine in place.
