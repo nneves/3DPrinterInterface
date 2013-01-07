@@ -62,7 +62,8 @@ function initialize (configdata) {
 	if (config.websockets) {
 
 		console.log('Launch/bind Soket.io WebSockets server');
-		socketio = require('socket.io').listen(app.server)
+		socketio = require('socket.io').listen(app.server);
+		socketio.set('log level', 1); // reduce logging
 
 		//------------------------------------------------------------------
 		// Socket.io
