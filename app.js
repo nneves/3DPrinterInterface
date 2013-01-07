@@ -5,14 +5,33 @@
 // * set modules configurations data
 // * start web interface
 
+var configdata = require('config');
+var node_env = 
+        process.env.NODE_ENV !== undefined ? 
+        process.env.NODE_ENV : 
+        "default";
+console.log("[app.js]:config/%s.json: $s", node_env, JSON.stringify(configdata));
+
 var flatiron = require('flatiron'),
     path = require('path'),
     ecstatic = require('ecstatic'),
     app = flatiron.app,    
-    tcpport = 8080,
-    restserver = require('./modules/rest.js'),
-    restserver_ip = '127.0.0.1',
-    restserver_tcpport = 8081,
+    tcpport = 
+        configdata.webinterface.tcpport !== undefined ? 
+        configdata.webinterface.tcpport : 
+        8080;
+
+// need to change REST API flatiron to launch from init function
+var restserver = require('./modules/rest.js').initialize(configdata);
+
+var restserver_ip = 
+        configdata.restapi.tcpport !== undefined ?
+        configdata.restapi.ipaddress : 
+        '127.0.0.1',
+    restserver_tcpport = 
+        configdata.restapi.tcpport !== undefined ?
+        configdata.restapi.tcpport :
+        8081,
     restserver_proxy = require('request');
 
 // flatiron configurations

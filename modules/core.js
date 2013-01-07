@@ -32,15 +32,15 @@ var lines_counter = 0;
 //------------------------------------------------------------------
 function spSetConfig (iconfig) {
 
-	console.log('[core.js]: Serial Port Set Config');
+	console.log('[core.js]:Serial Port Set Config: ', JSON.stringify(iconfig));
 
 	// verify and updates config
 	verifyUpdateConfig(iconfig);
 };
 
-function spInitialize (iconfig) {
+function initialize (iconfig) {
 
-	console.log('[core.js]: Serial Port initilization procedure');
+	console.log('[core.js]:initialize: ',JSON.stringify(iconfig));
 
 	// verify if object was already initialized
 	if (sp !== undefined)
@@ -51,7 +51,7 @@ function spInitialize (iconfig) {
 		verifyUpdateConfig(iconfig);
 
 	// SerialPort object initializationconsole
-	console.log('[core.js]: Instantiate Serial Port object');
+	console.log('[core.js]:Instantiate Serial Port object');
 	sp = new iSerialPort(config.serialport, {
 	    baudrate: config.baudrate,
 	    parser: iserialport.parsers.readline("\n")
@@ -64,14 +64,14 @@ function spInitialize (iconfig) {
 	sp.on('open', function(err) {
     if ( !err )
     	spFlagInit = true;
-        console.log("[core.js]: Serial Port %s Connected at %d bps!", config.serialport, config.baudrate);
+        console.log("[core.js]:Serial Port %s Connected at %d bps!", config.serialport, config.baudrate);
 
         if (spCBAfterOpen !== undefined) {
-        	console.log("[core.js]: Launching SerialPort After Open callback...");
+        	console.log("[core.js]:Launching SerialPort After Open callback...");
         	spCBAfterOpen();
         }
         else {
-        	console.log("[core.js]: No SerialPort After Open callback defined!");
+        	console.log("[core.js]:No SerialPort After Open callback defined!");
         }
 
         // calling printer emulator initializaion messages when using /dev/null
@@ -272,8 +272,8 @@ iStream.end = function (data) {
 // export
 //------------------------------------------------------------------
 module.exports = {
+	initialize: initialize,
 	setConfigPrinter: spSetConfig,
-	initializePrinter: spInitialize,
 	setCbAfterOpenPrinter: spSetCbAfterOpen,
 	iStreamPrinter: iStream,
 	oStreamPrinter: oStream,

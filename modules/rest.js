@@ -1,9 +1,11 @@
 // REST interface
 
+var configdata; // see module.export: set on require('rest.js')(configdata);
+
 var flatiron = require('flatiron'),
     app = flatiron.app,
-    config = {tcpPort: 8081},
-    mainapp = require('./mainapp.js');
+    config = {},
+    mainapp = require('./mainapp.js'); // complete init in initialize(): required due to config
 
 // lower level stream - hardware
 var JSONStream = require('json-stream'),
@@ -20,7 +22,6 @@ var arrayJSONmapping = ["printer","response","error","filelistgcode","filelistst
 //------------------------------------------------------------------
 // initialization
 //------------------------------------------------------------------
-
 // flatiron configurations
 //app.config.file({ file: path.join(__dirname, 'config', 'config.json') });
 
@@ -32,6 +33,66 @@ app.router.configure({"notfound":noroutingfound});
 
 // pipe core.js->oStream to a json-stream
 mainapp.outputStreamPrinter.pipe(jsonStream);
+
+//------------------------------------------------------------------
+// app start
+//------------------------------------------------------------------
+function initialize (configdata) {
+
+	console.log('[rest.js]:initizalize: ', JSON.stringify(configdata));
+
+	// initialize mainapp and send configdata
+	mainapp.initialize(configdata);
+
+   // internal module config
+   config.tcpPort = 
+	configdata.restapi.tcpport !== undefined ?
+    configdata.restapi.tcpport :
+    8081;
+   config.websockets = 
+	configdata.restapi.websockets !== undefined ?
+    configdata.restapi.websockets :
+    false;
+
+	// launch app on tcpoprt
+	app.start(config.tcpPort);
+	console.log('3D Printer REST-API Server running on port '+config.tcpPort);
+
+	// verify is WebSockets (socket.io) config is active
+	if (config.websockets) {
+
+		console.log('Launch/bind Soket.io WebSockets server');
+		socketio = require('socket.io').listen(app.server)
+
+		//------------------------------------------------------------------
+		// Socket.io
+		//------------------------------------------------------------------
+		socketio.sockets.on('connection', function(socket) {
+
+			socket.on('clientmsg', function(data) {
+		    	console.log('Received client message with data: '+data.wsdata);
+
+		    	// broadcast to all clients (exluding the origin client)
+		    	//socket.broadcast.emit('servermsg', { data: "I recieved your message: "+data.wsdata});
+
+		    	//send message to client
+		    	//socket.emit('servermsg', { data: "I recieved your message: "+data.wsdata});
+			});
+
+			// on 1s connection, emits cached printer array to jsonstream
+			if (flagCachePrinterMsg) {
+
+				flagCachePrinterMsg = false;
+				var cmd;
+				while (arrayCachePrinterMsg.length > 0) {
+					cmd = arrayCachePrinterMsg.shift();
+					console.log("[rest.js]:sockeio.OnConnection:jsonstream.emit: ", cmd);
+					jsonStream.emit('data', cmd);
+				}
+			}
+		});
+	}	
+};
 
 //------------------------------------------------------------------
 // routing
@@ -48,45 +109,6 @@ app.router.get(/api\/getfilelistgcode\/((\w|.)*)/, getFileListGCODE);
 app.router.get(/api\/getfileliststl\/((\w|.)*)/, getFileListSTL);
 
 //app.router.get(/urldownload\/((\w|.)*)/, downloadUrl);
-
-//------------------------------------------------------------------
-// app start
-//------------------------------------------------------------------
-
-// launch app on tcpoprt
-app.start(config.tcpPort);
-console.log('3D Printer REST-API Server running on port '+config.tcpPort);
-
-console.log('Launch/bind Soket.io WebSockets server');
-socketio = require('socket.io').listen(app.server)
-
-//------------------------------------------------------------------
-// Socket.io
-//------------------------------------------------------------------
-socketio.sockets.on('connection', function(socket) {
-
-	socket.on('clientmsg', function(data) {
-    	console.log('Received client message with data: '+data.wsdata);
-
-    	// broadcast to all clients (exluding the origin client)
-    	//socket.broadcast.emit('servermsg', { data: "I recieved your message: "+data.wsdata});
-
-    	//send message to client
-    	//socket.emit('servermsg', { data: "I recieved your message: "+data.wsdata});
-	});
-
-	// on 1s connection, emits cached printer array to jsonstream
-	if (flagCachePrinterMsg) {
-
-		flagCachePrinterMsg = false;
-		var cmd;
-		while (arrayCachePrinterMsg.length > 0) {
-			cmd = arrayCachePrinterMsg.shift();
-			console.log("[rest.js]:sockeio.OnConnection:jsonstream.emit: ", cmd);
-			jsonStream.emit('data', cmd);
-		}
-	}
-});	
 
 //------------------------------------------------------------------
 // functions
@@ -196,3 +218,16 @@ function getFileListSTL () {
 	this.res.write(JSON.stringify(response));
 	this.res.end();		
 }
+
+//------------------------------------------------------------------
+// export
+//------------------------------------------------------------------
+module.exports = {
+	initialize: initialize
+}
+/*
+module.exports = exports = function() {
+   console.log('[rest.js]:arguments: %j\n', arguments[0]);
+   configdata = arguments[0];
+};
+*/

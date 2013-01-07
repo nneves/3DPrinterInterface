@@ -12,19 +12,36 @@ var config = {},
 //------------------------------------------------------------------
 var dl = new downloadr.Downloader(); 
 
-// for debug purpose only - output core.js oStream data messages
-printercore.oStreamPrinter.pipe(process.stdout);
+function initialize (configdata) {
 
-printercore.setCbAfterOpenPrinter(function () { console.log('Printer initialization completed'); });
-// try interface without real 3d printer by using /dev/null
-printercore.setConfigPrinter({serialport: "/dev/null", baudrate: 115200});
-//printercore.setConfigPrinter({serialport: "/dev/tty.usbmodem621", baudrate: 115200});
-//printercore.setConfigPrinter({serialport: "/dev/tty.usbmodem622", baudrate: 115200});
+	console.log('[mainapp.js]:initizalize: ', JSON.stringify(configdata));
 
-// or (with 3d printer hardware) - alternative init method with args
-//printercore.initializePrinter({serialport: "/dev/tty.usbmodem622", baudrate: 115200});
+	// for debug purpose only - output core.js oStream data messages
+	printercore.oStreamPrinter.pipe(process.stdout);
 
-printercore.initializePrinter();
+	printercore.setCbAfterOpenPrinter(function () { console.log('Printer initialization completed'); });
+	// try interface without real 3d printer by using /dev/null
+	//printercore.setConfigPrinter({serialport: "/dev/null", baudrate: 115200});
+	//printercore.setConfigPrinter({serialport: "/dev/tty.usbmodem621", baudrate: 115200});
+	//printercore.setConfigPrinter({serialport: "/dev/tty.usbmodem622", baudrate: 115200});
+
+	// or (with 3d printer hardware) - alternative init method with args
+	//printercore.initialize({serialport: "/dev/tty.usbmodem622", baudrate: 115200});
+
+   	var spconfig = {};
+
+   	spconfig.serialport = 
+		configdata.serialport.serialport !== undefined ?
+    	configdata.serialport.serialport :
+		"/dev/null";
+
+	spconfig.baudrate = 
+		configdata.serialport.baudrate !== undefined ?
+    	configdata.serialport.baudrate :
+		115200;
+
+	printercore.initialize(spconfig);
+}
 
 //------------------------------------------------------------------
 // public functions
@@ -88,13 +105,6 @@ function getFileList (filetype) {
 	// will the drain even be triggered, only at that time it would return true
 	return true;
 }
-//------------------------------------------------------------------
-// getters/setters functions
-//------------------------------------------------------------------
-function setConfig (configdata) {
-	
-	config = configdata;
-};
 
 //------------------------------------------------------------------
 // private functions
@@ -189,7 +199,7 @@ function listdircallback (datalist) {
 // export
 //------------------------------------------------------------------
 module.exports = {
-	setConfig: setConfig,
+	initialize: initialize,
 	sendPrinterCmd: sendPrinterCmd,
 	sendPrinterFilename: sendPrinterFilename,
 	getFileList: getFileList,
