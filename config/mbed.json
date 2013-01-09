@@ -1,0 +1,14 @@
+{
+    "webinterface": {
+        "tcpport": 8080
+    },
+    "restapi": {
+        "ipaddress": "127.0.0.1",
+        "tcpport": 8081,
+        "websockets": true
+    },
+    "serialport": {
+        "serialport": "/dev/tty.usbmodem622", 
+        "baudrate": 115200
+    }
+}

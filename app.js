@@ -49,7 +49,10 @@ app.http.before = [
 app.router.get(/api\/((\w|.)*)/, requestProxy);
 
 // socketio resource: socket.io.js provided from socket.io itself (rest.js)
-app.router.get(/socket.io\/((\w|.)*)/, requestProxy);
+if (configdata.restapi.websockets == true)
+  app.router.get(/socket.io\/((\w|.)*)/, requestProxy);
+else
+  app.router.get(/socket.io\/((\w|.)*)/, dummySocketIo);
 
 // launch app on tcpoprt
 app.start(tcpport);
@@ -62,4 +65,14 @@ function requestProxy (data) {
 	console.log("Proxying request to %s", rest_addr);
 
 	restserver_proxy.get(rest_addr).pipe(this.res);
+}
+
+function dummySocketIo () {
+    
+    console.log("[app.js]:Dummy Socket.io javascript resource");
+
+    this.res.writeHead(200, {'Content-Type':'text/plain'});
+    this.res.write("// dummy socket.io.js file (required to silence browser errors ");
+    this.res.write("when loading default HTTP REST mode - without websockets support)");
+    this.res.end();     
 }
