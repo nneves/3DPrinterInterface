@@ -24,9 +24,9 @@ PRINTER.WebInterface = function () {
 
 	//socketio
 	this.socket;
-	this.initSocketio(window.location.host, 8081); // rest.js API module
-	//if (this.socket !== undefined)
-	//	this.socket.emit('clientmsg', { wsdata: "HelloAgain!" });
+
+	// request WebSockets config
+	this.getWSConfig();
 
 	// callback object list for UI/frontend easy usage
 	// maps socket.io object and calls callback function(data)
@@ -36,6 +36,23 @@ PRINTER.WebInterface = function () {
 
 //-----------------------------------------------------------------------------
 // Public - PRINTER namespace Scope
+//-----------------------------------------------------------------------------	
+
+PRINTER.WebInterface.prototype._XHRcallbackWSConfig = function (url, parent) {
+	return function() {
+		if (this.readyState == 4 || this.readyState == 0) {
+			console.log('<- XHR WSConfig['+url+'] = '+this.responseText);
+
+			var data = JSON.parse(this.responseText);
+			console.log(data);
+			if (data.response.websockets == true) {
+				parent.initSocketio(data.response.ipaddress, data.response.tcpport); // rest.js API module
+				//if (this.socket !== undefined)
+				//	this.socket.emit('clientmsg', { wsdata: "HelloAgain!" });
+			}
+		}
+	};
+};
 //-----------------------------------------------------------------------------	
 
 PRINTER.WebInterface.prototype.initSocketio = function (ip, port) {
@@ -128,6 +145,22 @@ PRINTER.WebInterface.prototype.getFileListSTL = function () {
         sendReq.setRequestHeader('Accept','application/json');
         sendReq.setRequestHeader('Content-Type','text/xml');
 		sendReq.onreadystatechange = this._XHRcallback(url_cmd);
+        console.log("-> XHR cmd["+url_cmd+"]");
+		sendReq.send(null);
+	}	
+};
+
+PRINTER.WebInterface.prototype.getWSConfig = function () {
+
+	// internal ajax request object
+	var sendReq = this._getXHRObject();	
+	var url_cmd = '/api/getwsconfig/';
+
+	if (sendReq.readyState == 4 || sendReq.readyState == 0) {
+		sendReq.open("GET",url_cmd,true);
+        sendReq.setRequestHeader('Accept','application/json');
+        sendReq.setRequestHeader('Content-Type','text/xml');
+		sendReq.onreadystatechange = this._XHRcallbackWSConfig(url_cmd, this);
         console.log("-> XHR cmd["+url_cmd+"]");
 		sendReq.send(null);
 	}	

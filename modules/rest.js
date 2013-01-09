@@ -45,7 +45,11 @@ function initialize (configdata) {
 	mainapp.initialize(configdata);
 
    // internal module config
-   config.tcpPort = 
+   config.ipaddress = 
+	configdata.restapi.ipaddress !== undefined ?
+    configdata.restapi.ipaddress :
+    '127.0.0.1';   
+   config.tcpport = 
 	configdata.restapi.tcpport !== undefined ?
     configdata.restapi.tcpport :
     8081;
@@ -55,14 +59,14 @@ function initialize (configdata) {
     false;
 
 	// launch app on tcpoprt
-	app.start(config.tcpPort);
-	console.log('3D Printer REST-API Server running on port '+config.tcpPort);
+	app.start(config.tcpport);
+	console.log('3D Printer REST-API Server running on port '+config.tcpport);
 
 	// verify is WebSockets (socket.io) config is active
 	if (config.websockets) {
 
 		console.log('Launch/bind Soket.io WebSockets server');
-		socketio = require('socket.io').listen(app.server);
+		socketio = require('socket.io').listen(app.server); // listen(app, { log: false });
 		socketio.set('log level', 1); // reduce logging
 
 		//------------------------------------------------------------------
@@ -110,6 +114,8 @@ app.router.get(/api\/getfilelistgcode\/((\w|.)*)/, getFileListGCODE);
 app.router.get(/api\/getfileliststl\/((\w|.)*)/, getFileListSTL);
 
 //app.router.get(/urldownload\/((\w|.)*)/, downloadUrl);
+
+app.router.get(/api\/getwsconfig\/((\w|.)*)/, getWSConfig);
 
 //------------------------------------------------------------------
 // functions
@@ -217,7 +223,18 @@ function getFileListSTL () {
 	// responding back to the brower request
 	this.res.writeHead(200, {'Content-Type':'application/json'});
 	this.res.write(JSON.stringify(response));
-	this.res.end();		
+	this.res.end();
+}
+
+function getWSConfig () {
+
+	var response = {response: config};
+	console.log('[rest.js]:getWSConfig: ',response);
+
+	// responding back to the brower request
+	this.res.writeHead(200, {'Content-Type':'application/json'});
+	this.res.write(JSON.stringify(response));
+	this.res.end();
 }
 
 //------------------------------------------------------------------
