@@ -47,8 +47,8 @@ PRINTER.WebInterface.prototype._XHRcallbackWSConfig = function (url, parent) {
 			console.log(data);
 			if (data.response.websockets == true) {
 				parent.initSocketio(data.response.ipaddress, data.response.tcpport); // rest.js API module
-				//if (this.socket !== undefined)
-				//	this.socket.emit('clientmsg', { wsdata: "HelloAgain!" });
+				//if (parent.socket !== undefined)
+				//	parent.socket.emit('clientmsg', { wsdata: "HelloAgain!" });
 			}
 		}
 	};
