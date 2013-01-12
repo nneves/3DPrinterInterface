@@ -71,7 +71,7 @@ function dummySocketIo () {
     
     console.log("[app.js]:Dummy Socket.io javascript resource");
 
-    this.res.writeHead(200, {'Content-Type':'text/plain'});
+    this.res.writeHead(200, {'Content-Type':'application/javascript'});
     this.res.write("// dummy socket.io.js file (required to silence browser errors ");
     this.res.write("when loading default HTTP REST mode - without websockets support)");
     this.res.end();     

@@ -19,6 +19,17 @@ var flagCachePrinterMsg = true;
 var arrayCachePrinterMsg = [];
 var arrayJSONmapping = ["printer","response","error","filelistgcode","fileliststl"];
 
+// REST callback list
+// maps http requests callbacks to be notified, response is triggered
+// when jsonStream detects a mapped cmd/response/etc
+var arrayHttpCallback = {
+		"printer":[],
+		"response":[],
+		"error":[],
+		"filelistgcode":[],
+		"fileliststl":[]
+	};
+
 //------------------------------------------------------------------
 // initialization
 //------------------------------------------------------------------
@@ -107,11 +118,16 @@ function initialize (configdata) {
 app.router.get('/api', help);
 
 app.router.get(/api\/sendprintercmd\/((\w|.)*)/, sendPrinterCmd);
+app.router.get(/api\/sendprintercmdasync\/((\w|.)*)/, sendPrinterCmdASync);
 
 app.router.get(/api\/sendprinterfilename\/((\w|.)*)/, sendPrinterFilename);
+app.router.get(/api\/sendprinterfilenameasync\/((\w|.)*)/, sendPrinterFilenameASync);
 
 app.router.get(/api\/getfilelistgcode\/((\w|.)*)/, getFileListGCODE);
+app.router.get(/api\/getfilelistgcodeasync\/((\w|.)*)/, getFileListGCODEASync);
+
 app.router.get(/api\/getfileliststl\/((\w|.)*)/, getFileListSTL);
+app.router.get(/api\/getfileliststlasync\/((\w|.)*)/, getFileListSTLASync);
 
 //app.router.get(/urldownload\/((\w|.)*)/, downloadUrl);
 
@@ -123,6 +139,37 @@ app.router.get(/api\/getwsconfig\/((\w|.)*)/, getWSConfig);
 
 jsonStream.on('data', function (dlines) {
 
+	// REST response
+	// verify message property to check if its mapped to propagate
+	for (prop in dlines) {
+		console.log("[rest.js]:Found jsonStream mapped property:", prop);
+		//dlines[prop]
+
+		// verify is callback is assigned
+		if (arrayHttpCallback[prop].length > 0) {
+			// notify http callbacks for the selected propery
+			console.log("[rest.js]:Calling Http Request Callback function...");
+			arrayHttpCallback[prop].shift()({ "data": dlines});	
+			//{"data":{"response":"ok"}}]	
+		}
+
+		/*
+		var lst = {"response":[]};
+		lst.response.push(function (parent, data) {console.log("Hello1")});
+
+		var lst = 	{response: [
+						function (parent, data) {console.log("Hello1")}, 
+						function (parent, data) {console.log("Hello2")}
+					]};
+
+		lst.response[0]();
+		->Hello1
+		lst.response[1]();
+		->Hello2
+		*/
+	}
+
+	// WebSockets - verify is client is connected
 	if (flagCachePrinterMsg) {
 		console.log('[rest.js]:JSONSTREAM:arrayCachePrinterMsg: ', dlines);
 
@@ -135,20 +182,20 @@ jsonStream.on('data', function (dlines) {
 
 		// verify message property to check if its mapped to propagate
 		for (prop in dlines) {
-			console.log(prop);
-			dlines[prop]
+			console.log("[rest.js]:Found jsonStream mapped property:", prop);
+			//dlines[prop]
 
 			// verify if property should be used 
 		    if (arrayJSONmapping.indexOf(prop) != -1) {
-				socketio.sockets.emit('servermsg', { data: dlines});
-			}			
+				socketio.sockets.emit('servermsg', { "data": dlines});
+			}	
 		}
 		// manual mapping: printer - not required, edit the arrayJSONmapping array to add mapping
 		/*
 	    if (dlines.printer !== undefined) {
 			console.log("[rest.js]:JSONSTREAM:printer: ", dlines.printer);
-			//socketio.sockets.emit('servermsg', { data: dlines.printer});
-			socketio.sockets.emit('servermsg', { data: dlines});
+			//socketio.sockets.emit('servermsg', { "data": dlines.printer});
+			socketio.sockets.emit('servermsg', { "data": dlines});
 		} */
 	}
 });
@@ -184,6 +231,30 @@ function downloadUrl (url) {
 
 function sendPrinterCmd (data) {
 
+	// add callback to the "response" command
+	var self = this;
+	var callbackHttpResponse = function (self, data) {
+		return function(response) {
+
+			console.log("[rest.js]:callbackHttpResponse: internal send response");
+
+			// responding back to the brower request
+			self.res.writeHead(200, {'Content-Type':'application/json'});
+			self.res.write(JSON.stringify(response));
+			self.res.end();			
+		};
+	};
+
+	// add callback to object.array to be processed via jsonStream notification
+	arrayHttpCallback.response.push(callbackHttpResponse(this, data));
+	//console.log("[rest.js]:Adding Http Response callback function from sendPrinterCmd:", callbackHttpResponse);
+
+	// sending command to printer
+	mainapp.sendPrinterCmd(data);
+}
+
+function sendPrinterCmdASync (data) {
+
 	var result = mainapp.sendPrinterCmd(data);
 	var response = {response: result};
 
@@ -194,6 +265,39 @@ function sendPrinterCmd (data) {
 }
 
 function sendPrinterFilename (filename) {
+/*
+	// add callback to the "response" command
+	var self = this;
+	var callbackHttpResponse = function (self, data) {
+		return function(response) {
+
+			console.log("[rest.js]:callbackHttpResponse: internal send response");
+
+			// responding back to the brower request
+			self.res.writeHead(200, {'Content-Type':'application/json'});
+			self.res.write(JSON.stringify(response));
+			self.res.end();			
+		};
+	};
+
+	// add callback to object.array to be processed via jsonStream notification
+	arrayHttpCallback.response.push(callbackHttpResponse(this, filename));
+	//console.log("[rest.js]:Adding Http Response callback function from sendPrinterCmd:", callbackHttpResponse);
+
+	// sending command to printer
+	mainapp.sendPrinterFilename(filename);
+*/
+
+	mainapp.sendPrinterFilename(filename);
+	var response = {"data":{"response":"ok"}};
+
+	// responding back to the brower request
+	this.res.writeHead(200, {'Content-Type':'application/json'});
+	this.res.write(JSON.stringify(response));
+	this.res.end();	
+}
+
+function sendPrinterFilenameASync (filename) {
 
 	var result = mainapp.sendPrinterFilename(filename);
 	var response = {response: result};
@@ -205,6 +309,30 @@ function sendPrinterFilename (filename) {
 }
 
 function getFileListGCODE () {
+		
+	// add callback to the "response" command
+	var self = this;
+	var callbackHttpResponse = function (self, data) {
+		return function(response) {
+
+			console.log("[rest.js]:callbackHttpResponse: internal send response");
+
+			// responding back to the brower request
+			self.res.writeHead(200, {'Content-Type':'application/json'});
+			self.res.write(JSON.stringify(response));
+			self.res.end();			
+		};
+	};
+
+	// add callback to object.array to be processed via jsonStream notification
+	arrayHttpCallback.filelistgcode.push(callbackHttpResponse(this, undefined));
+	console.log("[rest.js]:Adding Http Response callback function from sendPrinterCmd:", callbackHttpResponse);
+
+	// get gcode file list
+	mainapp.getFileList("GCODE");
+}
+
+function getFileListGCODEASync () {
 
 	var result = mainapp.getFileList("GCODE");
 	var response = {response: result};
@@ -216,6 +344,30 @@ function getFileListGCODE () {
 }
 
 function getFileListSTL () {
+
+	// add callback to the "response" command
+	var self = this;
+	var callbackHttpResponse = function (self, data) {
+		return function(response) {
+
+			console.log("[rest.js]:callbackHttpResponse: internal send response");
+
+			// responding back to the brower request
+			self.res.writeHead(200, {'Content-Type':'application/json'});
+			self.res.write(JSON.stringify(response));
+			self.res.end();			
+		};
+	};
+
+	// add callback to object.array to be processed via jsonStream notification
+	arrayHttpCallback.fileliststl.push(callbackHttpResponse(this, undefined));
+	//console.log("[rest.js]:Adding Http Response callback function from sendPrinterCmd:", callbackHttpResponse);
+
+	// get stl file list
+	mainapp.getFileList("STL");
+}
+
+function getFileListSTLASync () {
 
 	var result = mainapp.getFileList("STL");
 	var response = {response: result};

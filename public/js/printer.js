@@ -22,6 +22,9 @@ PRINTER.WebInterface = function () {
 
 	this.initRelativeMoveCmd();
 
+	// rest callbackXHR bridge to socket.io reponse channel
+	this.xhrcbrest = this.initXHRCallbackRest();
+
 	//socketio
 	this.socket;
 
@@ -38,7 +41,7 @@ PRINTER.WebInterface = function () {
 // Public - PRINTER namespace Scope
 //-----------------------------------------------------------------------------	
 
-PRINTER.WebInterface.prototype._XHRcallbackWSConfig = function (url, parent) {
+PRINTER.WebInterface.prototype._XHRcallbackWSConfig = function (parent, url) {
 	return function() {
 		if (this.readyState == 4 || this.readyState == 0) {
 			console.log('<- XHR WSConfig['+url+'] = '+this.responseText);
@@ -78,13 +81,45 @@ PRINTER.WebInterface.prototype.initSocketio = function (ip, port) {
 
 	        	// get serverdata.data object property, calls remote callback if defined
 	        	for (prop in serverdata.data) {
-		        	if (self.cblist[prop] !== undefined && typeof self.cblist[prop] === 'function')
+		        	if (self.cblist[prop] !== undefined && typeof self.cblist[prop] === 'function') {
+		        		//console.log("Socket.io: ", serverdata);
 		        		self.cblist[prop](serverdata.data);
+		        	}
 	        	}
 			};
 		};
+		// socket.io
     	this.socket.on('servermsg', inlinefunc(this));
     }
+};
+
+PRINTER.WebInterface.prototype.initXHRCallbackRest = function () {
+
+	// verify if socket.io is already assigned
+	// if so don't bridge the REST response via the same channel
+	if (typeof io === "undefined") {
+		var self = this;
+		var inlinefunc = function (self) {
+			return function(serverdata) {
+	        	//console.log('Received server message with data: '+JSON.stringify(serverdata.data));
+	        	console.log('initXHRCallbackRest: ', JSON.stringify(serverdata.data));
+	        	if (self.pPrinterMessage !== undefined)
+	        		self.pPrinterMessage(serverdata.data);
+
+	        	// get serverdata.data object property, calls remote callback if defined
+	        	for (prop in serverdata.data) {
+		        	if (self.cblist[prop] !== undefined && typeof self.cblist[prop] === 'function') {
+		        		//console.log("Socket.io: ", serverdata);
+		        		self.cblist[prop](serverdata.data);
+		        	}
+	        	}
+			};
+		};
+		return inlinefunc(this);
+	}
+	else {
+		return function (self) { console.log("initXHRCallbackRest: REST channel disabled!"); };	
+	}
 };
 
 PRINTER.WebInterface.prototype.sendCmd = function (cmd) {
@@ -96,7 +131,7 @@ PRINTER.WebInterface.prototype.sendCmd = function (cmd) {
 		sendReq.open("GET",url_cmd,true);
         sendReq.setRequestHeader('Accept','application/json');
         sendReq.setRequestHeader('Content-Type','text/xml');
-		sendReq.onreadystatechange = this._XHRcallback(url_cmd);
+		sendReq.onreadystatechange = this._XHRcallback(this, url_cmd);
         console.log("-> XHR cmd["+url_cmd+"]");
 		sendReq.send(null);
 	}	
@@ -112,7 +147,7 @@ PRINTER.WebInterface.prototype.sendFilename = function (filename) {
 		sendReq.open("GET",url_cmd,true);
         sendReq.setRequestHeader('Accept','application/json');
         sendReq.setRequestHeader('Content-Type','text/xml');
-		sendReq.onreadystatechange = this._XHRcallback(url_cmd);
+		sendReq.onreadystatechange = this._XHRcallback(this, url_cmd);
         console.log("-> XHR cmd["+url_cmd+"]");
 		sendReq.send(null);
 	}	
@@ -128,7 +163,7 @@ PRINTER.WebInterface.prototype.getFileListGCODE = function () {
 		sendReq.open("GET",url_cmd,true);
         sendReq.setRequestHeader('Accept','application/json');
         sendReq.setRequestHeader('Content-Type','text/xml');
-		sendReq.onreadystatechange = this._XHRcallback(url_cmd);
+		sendReq.onreadystatechange = this._XHRcallback(this, url_cmd);
         console.log("-> XHR cmd["+url_cmd+"]");
 		sendReq.send(null);
 	}	
@@ -144,7 +179,7 @@ PRINTER.WebInterface.prototype.getFileListSTL = function () {
 		sendReq.open("GET",url_cmd,true);
         sendReq.setRequestHeader('Accept','application/json');
         sendReq.setRequestHeader('Content-Type','text/xml');
-		sendReq.onreadystatechange = this._XHRcallback(url_cmd);
+		sendReq.onreadystatechange = this._XHRcallback(this, url_cmd);
         console.log("-> XHR cmd["+url_cmd+"]");
 		sendReq.send(null);
 	}	
@@ -160,7 +195,7 @@ PRINTER.WebInterface.prototype.getWSConfig = function () {
 		sendReq.open("GET",url_cmd,true);
         sendReq.setRequestHeader('Accept','application/json');
         sendReq.setRequestHeader('Content-Type','text/xml');
-		sendReq.onreadystatechange = this._XHRcallbackWSConfig(url_cmd, this);
+		sendReq.onreadystatechange = this._XHRcallbackWSConfig(this, url_cmd);
         console.log("-> XHR cmd["+url_cmd+"]");
 		sendReq.send(null);
 	}	
@@ -184,12 +219,17 @@ PRINTER.WebInterface.prototype._getXHRObject = function () {
 };
 //-----------------------------------------------------------------------------	
 
-PRINTER.WebInterface.prototype._XHRcallback = function (url) {
+PRINTER.WebInterface.prototype._XHRcallback = function (parent, url) {
+
 	return function() {
 		if (this.readyState == 4 || this.readyState == 0) {
 			console.log('<- XHR cmd['+url+'] = '+this.responseText);
+
+			var data = JSON.parse(this.responseText);
+			console.log("_XHRcallback: ", JSON.stringify(data));
+			parent.xhrcbrest(data);
 		}
-	};
+	};	
 };
 //-----------------------------------------------------------------------------	
 
