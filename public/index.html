@@ -9,6 +9,18 @@
 <body>
 	<div id="header" class="header"><img src="images/ultimaker.png" alt="Ultimaker" class="header_image"></div>
 
+  <div id="customcmd" class="customcmd">
+    <button id="btnCmd01" type="button" onClick="printer.sendCmd('M104 S220')">Set Temp. 220º</button>
+    <button id="btnCmd02" type="button" onClick="printer.sendCmd('M104 S0')">Set Temp. 0º</button>
+    <input id="edtPrinterSetTemperature" type="text" value="0" class="temperature" />
+     | 
+    <button id="btnCmd03" type="button" onClick="printer.sendCmd('M105')">Get Temp.</button>
+    <input id="edtPrinterTemperature" type="text" value="0" class="temperature" />
+     | 
+    <button id="btnCmd04" type="button" onClick="printer.sendCmd('M106 255')">Fan ON</button>
+    <button id="btnCmd05" type="button" onClick="printer.sendCmd('M107')">Fan OFF</button>
+  </div>
+
 	<div id="block01" class="block01">
     <img src="images/y-plus.png" class="yplus" onClick="printer.moveYPlus(parseFloat(jogname.value), parseInt(xyfeedrate.value, 10));">
     <img src="images/y-minus.png" class="yminus" onClick="printer.moveYMinus(parseFloat(jogname.value), parseInt(xyfeedrate.value, 10));">
@@ -16,7 +28,9 @@
 		<img src="images/x-minus.png" class="xminus" onClick="printer.moveXMinus(parseFloat(jogname.value), parseInt(xyfeedrate.value, 10));">
 		<img src="images/z-plus.png" class="zplus" onClick="printer.moveZPlus(parseFloat(jogname.value), parseInt(zfeedrate.value, 10));">
 		<img src="images/z-minus.png" class="zminus" onClick="printer.moveZMinus(parseFloat(jogname.value), parseInt(zfeedrate.value, 10));">
-    <img src="images/home.png" width="61" height="31" class="home" onClick="printer.moveHome();">
+    <img src="images/e-plus.png" class="eplus" onClick="printer.sendCmd('G1 E5 F400');">
+    <img src="images/e-minus.png" class="eminus" onClick="printer.sendCmd('G1 E-5 F400');">
+    <img src="images/home.png" width="61" height="31" class="home" onClick="printer.moveHome();">    
 	</div>
 
     <div id="block03" class="block03">
@@ -61,6 +75,8 @@
   <script type="text/javascript">
     var oPrinterMessage = document.getElementById('textPrinterMsg');
     var lblPrinterMessage = document.getElementById('lblPrinterMsg');
+    var edtPrinterTemperature = document.getElementById('edtPrinterTemperature');
+    var edtPrinterSetTemperature = document.getElementById('edtPrinterSetTemperature');
 
     var cbPrinterMessages = function (data) {
       var datastring = JSON.stringify(data);
@@ -71,10 +87,17 @@
       var counter = parseInt(arrayLbl[1],10);
       counter += 1;
       lblPrinterMessage.innerHTML = arrayLbl[0] + ":" + counter.toString();
+
+      // check for temperature
+      if (data.hasOwnProperty("temperature")) {
+        edtPrinterTemperature.value = data.temperature.T0;
+        edtPrinterSetTemperature.value = data.temperature.T1;
+      }
     } 
   
     var printer = PRINTER.WebInterface();
     printer.cblist.response = cbPrinterMessages;
+    printer.cblist.temperature = cbPrinterMessages;
     printer.cblist.printer = cbPrinterMessages;
     printer.cblist.error = cbPrinterMessages;
     printer.cblist.filelistgcode = cbPrinterMessages;

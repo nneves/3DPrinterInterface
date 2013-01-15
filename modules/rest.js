@@ -17,7 +17,7 @@ var socketio;
 // cache printer messages until 1st client connects
 var flagCachePrinterMsg = true;
 var arrayCachePrinterMsg = [];
-var arrayJSONmapping = ["printer","response","error","filelistgcode","fileliststl"];
+var arrayJSONmapping = ["printer","response","temperature","error","filelistgcode","fileliststl"];
 
 // REST callback list
 // maps http requests callbacks to be notified, response is triggered
@@ -25,10 +25,15 @@ var arrayJSONmapping = ["printer","response","error","filelistgcode","filelistst
 var arrayHttpCallback = {
 		"printer":[],
 		"response":[],
+		"temperature":[],
 		"error":[],
 		"filelistgcode":[],
 		"fileliststl":[]
 	};
+
+// REST - sendPrinterCmd special cases (temperature, etc)
+// re-channel request from standard "response" type to "temperature"
+var gcodeCustomResponse = {"M105": "temperature"};
 
 //------------------------------------------------------------------
 // initialization
@@ -245,9 +250,17 @@ function sendPrinterCmd (data) {
 		};
 	};
 
-	// add callback to object.array to be processed via jsonStream notification
-	arrayHttpCallback.response.push(callbackHttpResponse(this, data));
-	//console.log("[rest.js]:Adding Http Response callback function from sendPrinterCmd:", callbackHttpResponse);
+	// test for gcode command special cases: M105=temperature, etc
+	if (gcodeCustomResponse.hasOwnProperty(data)) {
+		console.log("[rest.js]:Found special gcode command data %s, redirect callback to channel: %s", data, gcodeCustomResponse[data]);
+		arrayHttpCallback[gcodeCustomResponse[data]].push(callbackHttpResponse(this, data));
+	}
+	else {
+
+		// add callback to object.array to be processed via jsonStream notification
+		arrayHttpCallback.response.push(callbackHttpResponse(this, data));
+		//console.log("[rest.js]:Adding Http Response callback function from sendPrinterCmd:", callbackHttpResponse);
+	}
 
 	// sending command to printer
 	mainapp.sendPrinterCmd(data);

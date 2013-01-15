@@ -1,14 +1,14 @@
 {
     "webinterface": {
         "tcpport": 8080
-    },  
+    },
     "restapi": {
-        "ipaddress": "127.0.0.1",
+        "ipaddress": "workbench01", //hostname from rpi - required for socket.io UI to resolve
         "tcpport": 8081,
         "websockets": false
     },
     "serialport": {
-        "serialport": "/dev/tty.usbmodem621", 
+        "serialport": "/dev/ttyACM0",
         "baudrate": 115200
     }
 }

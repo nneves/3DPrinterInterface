@@ -160,13 +160,30 @@ function spCBResponse (data) {
 
 		//console.log('[core.js]:JSONSTREAM:countlines ', lines_counter);	
 
-		var rescmd = {"response":idata};
-		oStream.emit('data', JSON.stringify(rescmd)+'\r\n\r\n');
-
 //NOTE: printer temperature data will be triggered in the 'ok' switch
 //		{"response":"ok T:18.8 /0.0 B:0.0 /0.0 @:0"}
 //		need to implement a special case with regex to test this 
 //		specific response and warp it in a {"temperture":idata}; 
+		var pattern = /([a-zA-z@]:)/;
+		if (pattern.test(idata)) {
+			// found temperature response, split data into format:
+			// ["ok ", "T:", "131.3 /0.0 ", "B:", "0.0 /0.0 ", "@:", "0"]
+			var tempdata = idata.split(pattern);
+			var temperature = {
+					"T0": tempdata[2].split("/")[0].replace(" ", ""),
+					"T1": tempdata[2].split("/")[1].replace(" ", ""),
+					"B0": tempdata[4].split("/")[0].replace(" ", ""),
+					"B1": tempdata[4].split("/")[1].replace(" ", ""),
+					"C": tempdata[6].replace(" ", "")
+				};
+			var rescmd2 = {"temperature":temperature};
+			oStream.emit('data', JSON.stringify(rescmd2)+'\r\n\r\n');			
+		}
+		else {
+			// normal response
+			var rescmd = {"response":idata};
+			oStream.emit('data', JSON.stringify(rescmd)+'\r\n\r\n');			
+		}
 
 		// verify if it can 'drain' the iStream
 		if (lines_counter <= 0)
