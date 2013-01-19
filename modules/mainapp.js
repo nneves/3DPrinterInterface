@@ -57,7 +57,7 @@ function sendPrinterCmd (data) {
 	return true;
 }
 
-function sendPrinterFilename (filename) {
+function sendPrinterData (filename) {
 	
 	var path = process.cwd()+'/bin/gcode/'+filename;
 	console.log('Send file to printer: %s', path);
@@ -67,7 +67,7 @@ function sendPrinterFilename (filename) {
 
 	// This catches any errors that happen while creating the readable stream (usually invalid names)
 	readableStream.on('error', function(err) {
-		console.log('Error while trying to sendPrinterFilename: ', err);
+		console.log('Error while trying to sendPrinterData: ', err);
 		// error triggered asynchronously, need to report back to the origin of the request
 	});
 
@@ -201,7 +201,7 @@ function listdircallback (datalist) {
 module.exports = {
 	initialize: initialize,
 	sendPrinterCmd: sendPrinterCmd,
-	sendPrinterFilename: sendPrinterFilename,
+	sendPrinterData: sendPrinterData,
 	getFileList: getFileList,
 	outputStreamPrinter: printercore.oStreamPrinter
 };

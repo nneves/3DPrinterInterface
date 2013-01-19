@@ -1,4 +1,19 @@
-// REST interface
+/**
+ * 3D Printer Interface - Interface with a 3d Printer using http protocol
+ * 
+ * This documentation provides a simple guideline on how to use the REST API 
+ * from project [3D Printer Interface](https://github.com/nneves/3DPrinterInterface)
+ * to be used with the UI/frontend integration in the app.js module. 
+ *
+ * Please refer to [3DPi WebApp](https://www.lucidchart.com/documents/view/4f5c-1f6c-50baa492-9d74-10150a442276)
+ * documentation for an overhaul overview of the project internal modules.
+ *
+ * @author Nelson Neves <nelson.s.neves@gmail.com>
+ *
+ * @version 0.0.1
+ *
+ * @module rest.js
+ */
 
 var configdata; // see module.export: set on require('rest.js')(configdata);
 
@@ -125,8 +140,8 @@ app.router.get('/api', help);
 app.router.get(/api\/sendprintercmd\/((\w|.)*)/, sendPrinterCmd);
 app.router.get(/api\/sendprintercmdasync\/((\w|.)*)/, sendPrinterCmdASync);
 
-app.router.get(/api\/sendprinterfilename\/((\w|.)*)/, sendPrinterFilename);
-app.router.get(/api\/sendprinterfilenameasync\/((\w|.)*)/, sendPrinterFilenameASync);
+app.router.get(/api\/sendprinterdata\/((\w|.)*)/, sendPrinterData);
+app.router.get(/api\/sendprinterdataasync\/((\w|.)*)/, sendPrinterDataASync);
 
 app.router.get(/api\/getfilelistgcode\/((\w|.)*)/, getFileListGCODE);
 app.router.get(/api\/getfilelistgcodeasync\/((\w|.)*)/, getFileListGCODEASync);
@@ -158,7 +173,7 @@ jsonStream.on('data', function (dlines) {
 			//{"data":{"response":"ok"}}]	
 		}
 
-		/*
+		/*!
 		var lst = {"response":[]};
 		lst.response.push(function (parent, data) {console.log("Hello1")});
 
@@ -196,7 +211,7 @@ jsonStream.on('data', function (dlines) {
 			}	
 		}
 		// manual mapping: printer - not required, edit the arrayJSONmapping array to add mapping
-		/*
+		/*!
 	    if (dlines.printer !== undefined) {
 			console.log("[rest.js]:JSONSTREAM:printer: ", dlines.printer);
 			//socketio.sockets.emit('servermsg', { "data": dlines.printer});
@@ -205,6 +220,18 @@ jsonStream.on('data', function (dlines) {
 	}
 });
 
+//------------------------------------------------------------------
+// public REST API
+//------------------------------------------------------------------
+/**
+ * REST API help.
+ *
+ * Examples:
+ *
+ *     http://restapi_ip:port/api
+ *
+ * @api public
+ */
 function help () {
 
 	// responding back to the brower request
@@ -213,6 +240,10 @@ function help () {
 	this.res.end();
 }
 
+/*!
+ * Default endpoint for unmapped requests
+ * @private
+ */
 function noroutingfound () {
 
 	var response = {response: false, error: 'Resource not available!'};
@@ -223,7 +254,7 @@ function noroutingfound () {
 	this.res.write(JSON.stringify(response));
 	this.res.end();			
 }
-/*
+/*!
 function downloadUrl (url) {
 	console.log('REST-API: Request URL download: %s', url);
 	mainapp.downloadUrl(url, '');
@@ -234,6 +265,18 @@ function downloadUrl (url) {
 	this.res.end();	
 } */
 
+/**
+ * Send GCODE command to printer
+ *
+ * Examples:
+ *
+ *     http://restapi_ip:port/api/sendprintercmd/G28
+ *
+ * @see GET
+ * @param {String} gcodecmd
+ * @return {Object} {"data":{"response":"ok"}}
+ * @api public
+ */
 function sendPrinterCmd (data) {
 
 	// add callback to the "response" command
@@ -266,6 +309,20 @@ function sendPrinterCmd (data) {
 	mainapp.sendPrinterCmd(data);
 }
 
+/**
+ * Send GCODE command to printer [ASYNC method]
+ *
+ * NOTE: request response is sent without waiting for printer 
+ *
+ * Examples:
+ *
+ *     http://restapi_ip:port/api/sendprintercmdasync/G1%20X1%20F800
+ *
+ * @see GET
+ * @param {String} gcodecmd
+ * @return {Object} {"response":true}
+ * @api public
+ */
 function sendPrinterCmdASync (data) {
 
 	var result = mainapp.sendPrinterCmd(data);
@@ -277,8 +334,24 @@ function sendPrinterCmdASync (data) {
 	this.res.end();		
 }
 
-function sendPrinterFilename (filename) {
-/*
+/**
+ * Send GCODE data from file to printer
+ * 
+ * This command will trigger the 3d object print function,
+ * it uses node.js FileStreams to read the content of the GCODE
+ * file and send it in small blocks of data to the printer in a efficient way.
+ * 
+ * Examples:
+ *
+ *     http://restapi_ip:port/api/sendprinterdata/octopus.gcode
+ *
+ * @see GET
+ * @param {String} filename (cached file from: appdir/bin/gcode/)
+ * @return {Object} {"data":{"response":"ok"}}
+ * @api public
+ */
+function sendPrinterData(filename) {
+/*!
 	// add callback to the "response" command
 	var self = this;
 	var callbackHttpResponse = function (self, data) {
@@ -301,8 +374,8 @@ function sendPrinterFilename (filename) {
 	mainapp.sendPrinterFilename(filename);
 */
 
-	mainapp.sendPrinterFilename(filename);
-	var response = {"data":{"response":"ok"}};
+	mainapp.sendPrinterData(filename);
+	var response = {"data":{"response":"ok"}}; // need to fix this!
 
 	// responding back to the brower request
 	this.res.writeHead(200, {'Content-Type':'application/json'});
@@ -310,9 +383,27 @@ function sendPrinterFilename (filename) {
 	this.res.end();	
 }
 
-function sendPrinterFilenameASync (filename) {
+/**
+ * Send GCODE data from file to printer [ASYNC method]
+ *
+ * NOTE: request response is sent without waiting for printer  
+ * 
+ * This command will trigger the 3d object print function,
+ * it uses node.js FileStreams to read the content of the GCODE
+ * file and send it in small blocks of data to the printer in a efficient way.
+ * 
+ * Examples:
+ *
+ *     http://restapi_ip:port/api/sendprinterdataasync/octopus.gcode
+ *
+ * @see GET
+ * @param {String} filename (cached file from: appdir/bin/gcode/)
+ * @return {Object} {"response":true}
+ * @api public
+ */
+function sendPrinterDataASync (filename) {
 
-	var result = mainapp.sendPrinterFilename(filename);
+	var result = mainapp.sendPrinterData(filename);
 	var response = {response: result};
 
 	// responding back to the brower request
@@ -321,6 +412,19 @@ function sendPrinterFilenameASync (filename) {
 	this.res.end();		
 }
 
+/**
+ * Get cached GCODE files list
+ *
+ * Requests a list of existing GCODE files under appdir/bin/gcode/
+ * 
+ * Examples:
+ *
+ *     http://restapi_ip:port/api/getfilelistgcode/
+ *
+ * @see GET
+ * @return {Object} {"data":{"filelistgcode":[{"filename":"octopus.gcode","extension":"gcode","filesize":1670110}]}}
+ * @api public
+ */
 function getFileListGCODE () {
 		
 	// add callback to the "response" command
@@ -345,6 +449,21 @@ function getFileListGCODE () {
 	mainapp.getFileList("GCODE");
 }
 
+/*!
+ * Get cached GCODE files list [ASYNC method]
+ *
+ * NOTE: request response is sent without waiting for OS  
+ *
+ * Requests a list of existing GCODE files under appdir/bin/gcode/
+ * 
+ * Examples:
+ *
+ *     http://restapi_ip:port/api/getfilelistgcodeasync/
+ *
+ * @see GET
+ * @return {Object} {"response":true}
+ * @api public
+ */
 function getFileListGCODEASync () {
 
 	var result = mainapp.getFileList("GCODE");
@@ -356,6 +475,19 @@ function getFileListGCODEASync () {
 	this.res.end();		
 }
 
+/**
+ * Get cached STL files list
+ *
+ * Requests a list of existing STL files under appdir/bin/stl/
+ * 
+ * Examples:
+ *
+ *     http://restapi_ip:port/api/getfileliststl/
+ *
+ * @see GET
+ * @return {Object} {"data":{"fileliststl":[{"filename":"octopus.stl","extension":"stl","filesize":172626}]}}
+ * @api public
+ */
 function getFileListSTL () {
 
 	// add callback to the "response" command
@@ -380,6 +512,21 @@ function getFileListSTL () {
 	mainapp.getFileList("STL");
 }
 
+/*!
+ * Get cached STL files list [ASYNC method]
+ *
+ * NOTE: request response is sent without waiting for OS
+ *
+ * Requests a list of existing STL files under appdir/bin/stl/
+ * 
+ * Examples:
+ *
+ *     http://restapi_ip:port/api/getfileliststlasync/
+ *
+ * @see GET
+ * @return {Object} {"response":true}
+ * @api public
+ */
 function getFileListSTLASync () {
 
 	var result = mainapp.getFileList("STL");
@@ -391,6 +538,23 @@ function getFileListSTLASync () {
 	this.res.end();
 }
 
+/**
+ * Get node.js WebSockets config data 
+ *
+ * Requests data from node.js config (appdir/config/default.js) 
+ * required for the UI Socket.io funcionality (WebSockets Server enabled flag, ip, port)
+ * 
+ * NOTE: different configs can be used when launching 'node.js app.js' using 'export NODE_ENV=rpi'
+ * [npm config package](https://npmjs.org/package/config)
+ * 
+ * Examples:
+ *
+ *     http://restapi_ip:port/api/getwsconfig/
+ *
+ * @see GET
+ * @return {Object} {"response":{"ipaddress":"127.0.0.1","tcpport":8081,"websockets":false}}
+ * @api public
+ */
 function getWSConfig () {
 
 	var response = {response: config};
@@ -408,7 +572,7 @@ function getWSConfig () {
 module.exports = {
 	initialize: initialize
 }
-/*
+/*!
 module.exports = exports = function() {
    console.log('[rest.js]:arguments: %j\n', arguments[0]);
    configdata = arguments[0];

@@ -137,11 +137,11 @@ PRINTER.WebInterface.prototype.sendCmd = function (cmd) {
 	}	
 };
 
-PRINTER.WebInterface.prototype.sendFilename = function (filename) {
+PRINTER.WebInterface.prototype.sendData = function (filename) {
 
 	// internal ajax request object
 	var sendReq = this._getXHRObject();	
-	var url_cmd = '/api/sendprinterfilename/'+filename;
+	var url_cmd = '/api/sendprinterdata/'+filename;
 
 	if (sendReq.readyState == 4 || sendReq.readyState == 0) {
 		sendReq.open("GET",url_cmd,true);

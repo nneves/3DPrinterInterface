@@ -5,7 +5,7 @@
     "restapi": {
         "ipaddress": "127.0.0.1",
         "tcpport": 8081,
-        "websockets": true
+        "websockets": false
     },
     "serialport": {
         "serialport": "/dev/null", 
