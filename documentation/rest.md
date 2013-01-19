@@ -2,7 +2,10 @@
 
 <!-- Start ../modules/rest.js -->
 
-3D Printer Interface - Interface with a 3d Printer using http protocol
+3D Printer Interface - REST API
+---------------------
+
+Interface with a 3d Printer using http protocol
 
 This documentation provides a simple guideline on how to use the REST API 
 from project [3D Printer Interface](https://github.com/nneves/3DPrinterInterface)
