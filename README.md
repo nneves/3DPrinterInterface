@@ -5,13 +5,19 @@
 
 ChangeLog
 ---------
-Status: Core functionality is now in place (just missing a few minor stuff - configs, etc)
+Status: Core functionality is now in place. Started to prepare technical documentation for UI integration.
 UI interface still under development (at the moment there are only some basic test functionalities)
+
+* Update 4 (19-Jan-2013)
+    - Added documentation for the REST API interface (required for UI implementation)
+    - Refactored core module configurations to use config/*.json files
+    - Fixed issues #12, #13, #14
+    - .
 
 * Update3 (31-Dec-2012)
     - Added Socket.io for websockets communication (currently used to upload printer response to UI, should add support for bidirectional communication - will also maintain REST for API interface)
     - Added support in printer.js UI Library to map local callbacks with Socket.io Event Messages for easy integration with UI components
-    - Fixed issues #2,#3,#4,#5,#6,#7,#8,#11
+    - Fixed issues #2, #3, #4, #5, #6, #7, #8, #11
     - .
 
 * Update2 (29-Nov-2012): 
@@ -27,13 +33,15 @@ Initial ./modules/core.js module is now working with writable stream interface, 
 TODO
 ----
     - Completlety redesign the frontend UI and add extra functionalities
-    - Refactor core module configurations to use config/*.json files
-    - Create documentation for UI implementation
     - Create documentation to explain core modules communication/workflow
 
 Techincal Specs initial draft (work in progress)
 -----------------------------
 https://www.lucidchart.com/documents/view/4f5c-1f6c-50baa492-9d74-10150a442276
+
+REST API documentation (required for UI integration)
+-----------------------
+ https://github.com/nneves/3DPrinterInterface/blob/master/documentation/rest.md
 
 How to test 3DPI
 ----------------
