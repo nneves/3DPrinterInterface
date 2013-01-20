@@ -60,7 +60,8 @@ $ npm update
 ```
 
 // update configuration files (./config/*.json)
-[npm config package](https://npmjs.org/package/config)
+
+More info here: [npm config package](https://npmjs.org/package/config)
 
 ```bash
 # update rpi.json file and update the serialport property
@@ -68,15 +69,18 @@ nano ./config/rpi.json
 ```
 
 // set node.js environment var to use ./config/rpi.json
+
 // Note: when using default.json it is not required to export the variable, several config files can be set, only the export will be used by node.js
 ```bash
 export NODE_ENV=rpi
 ```
 
-// launch demo WebInterface (will run on port 8080, REST API on 8081 and using /dev/null to emulate printer serial port - printer response emulated by timer)
+// launch demo WebInterface (will run on port 8080, REST API on 8081 and using the serialport defined in the exported config file)
 ```bash
 $ node app.js
 ```
+
+// Note: to test node app.js without a printer configure the serialport property with /dev/null to emulate printer serial port - printer response emulated by timer (default.js already configured with /dev/null)
 
 3d Printers/electronic boards/microcontrollers tested hardware
 ----------------------
