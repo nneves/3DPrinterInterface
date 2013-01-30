@@ -70,7 +70,7 @@ nano ./config/rpi.json
 
 // set node.js environment var to use ./config/rpi.json
 
-// Note: when using default.json it is not required to export the variable, several config files can be set, only the export will be used by node.js
+// Note: when using default.json it is not required to export the variable, several config files can be set, only the exported will be used by node.js
 ```bash
 export NODE_ENV=rpi
 ```

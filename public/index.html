@@ -28,8 +28,8 @@
 		<img src="images/x-minus.png" class="xminus" onClick="printer.moveXMinus(parseFloat(jogname.value), parseInt(xyfeedrate.value, 10));">
 		<img src="images/z-plus.png" class="zplus" onClick="printer.moveZPlus(parseFloat(jogname.value), parseInt(zfeedrate.value, 10));">
 		<img src="images/z-minus.png" class="zminus" onClick="printer.moveZMinus(parseFloat(jogname.value), parseInt(zfeedrate.value, 10));">
-    <img src="images/e-plus.png" class="eplus" onClick="printer.sendCmd('G1 E5 F400');">
-    <img src="images/e-minus.png" class="eminus" onClick="printer.sendCmd('G1 E-5 F400');">
+    <img src="images/e-plus.png" class="eplus" onClick="printer.sendCmd('G1 E10 F8000');">
+    <img src="images/e-minus.png" class="eminus" onClick="printer.sendCmd('G1 E-10 F8000');">
     <img src="images/home.png" width="61" height="31" class="home" onClick="printer.moveHome();">    
 	</div>
 
@@ -77,6 +77,11 @@
     var lblPrinterMessage = document.getElementById('lblPrinterMsg');
     var edtPrinterTemperature = document.getElementById('edtPrinterTemperature');
     var edtPrinterSetTemperature = document.getElementById('edtPrinterSetTemperature');
+    /*
+    function demo () {
+        printer.sendCmd('G1 E100 F8000');
+        //setTimeout(demo, 500);
+    } */
 
     var cbPrinterMessages = function (data) {
       var datastring = JSON.stringify(data);

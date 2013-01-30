@@ -5,7 +5,8 @@ var config = {},
 	readableStream,
 	downloadr = require('./downloader.js'),
 	slicer = require('./slicer.js'),
-	printercore = require('./core.js');
+	printercore = require('./core.js'),
+	joystick = require('./interfaces/joystick.js');
 
 //------------------------------------------------------------------
 // initialization
@@ -41,6 +42,13 @@ function initialize (configdata) {
 		115200;
 
 	printercore.initialize(spconfig);
+
+	
+	// joystick controller
+	joystick.initialize(
+		configdata,
+		printercore.cmdStreamPrinter,
+		printercore.oStreamPrinter);	
 }
 
 //------------------------------------------------------------------

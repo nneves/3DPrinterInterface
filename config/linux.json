@@ -10,5 +10,9 @@
     "serialport": {
         "serialport": "/dev/ttyACM0", 
         "baudrate": 115200
-    }
+    },
+    "joystick": {
+        "enabled": true, 
+        "device": "/dev/input/js1"
+    }        
 }
