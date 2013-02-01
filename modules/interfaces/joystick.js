@@ -137,10 +137,18 @@ function processData () {
         console.log("[joystick.js]:found joystick matching rule: ", element.action);
 
         var data = element.cmd;
-        var jsoncmd = {"gcode": data};
+        var jsoncmd = {"id":getId(), "gcode": data};
         var result = cmdStreamPrinter.emit('data', jsoncmd);
     }
   }); 
+}
+
+//------------------------------------------------------------------
+// auxiliar funtions
+//------------------------------------------------------------------
+
+function getId () {
+    return Math.floor((Math.random()*10000)+1);
 }
 //------------------------------------------------------------------
 // export
