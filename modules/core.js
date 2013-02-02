@@ -26,6 +26,7 @@ oStream.readble = true;
 // internal auxiliar vars
 var array_strbuffer = "";
 var lines_counter = 0;
+var idcmdlist = [];
 
 //------------------------------------------------------------------
 // public functions
@@ -105,8 +106,14 @@ function verifyUpdateConfig (iconfig) {
 	console.log('[core.js]:Serial Port initialization: %s, %d ...', config.serialport, config.baudrate);
 };
 
-function spWrite (cmd) {
+function spWrite (dlines) {
 	
+	var cmd = dlines.gcode;
+	var id = dlines.id;
+
+	if (id === undefined)
+		id = 0;
+
 	if (cmd === undefined || cmd.length == 0) {
 		spCBResponse("empty_cmd\n");
 		return false;
@@ -128,7 +135,16 @@ function spWrite (cmd) {
 			cmd = " G4 P10"; // do nothing for 10 ms
 	}
 
-	console.log('[core.js]:spWrite() -> '+cmd+endchar);
+	if (id > 0)
+		console.log("[core.js]:spWrite: ID[%d]=%s", id, cmd+endchar);
+	else
+		console.log("[core.js]:spWrite: %s", cmd+endchar);
+
+	// add id to response list
+	if (id > 0) {
+		console.log("[core.js]:Pushing ID=%d to response list", id);
+		idcmdlist.push(id);
+	}
 
 	// writes data to serialport
 	sp.write(cmd.trim()+endchar);
@@ -182,6 +198,12 @@ function spCBResponse (data) {
 		else {
 			// normal response
 			var rescmd = {"response":idata};
+			if (idcmdlist.length > 0) {
+				rescmd.id = idcmdlist.shift();
+
+				console.log("[core.js]:Adding ID=%d to response: %s", rescmd.id, JSON.stringify(rescmd));
+			}
+
 			oStream.emit('data', JSON.stringify(rescmd)+'\r\n\r\n');			
 		}
 
@@ -226,12 +248,12 @@ function emulatePrinterInitMsg () {
 
 jsonStream.on('data', function (dlines) {
 	
-	//console.log('[core.js]:JSONSTREAM: ', dlines);
+	console.log('[core.js]:JSONSTREAM: ', dlines);
  	lines_counter++;
 	//console.log('[core.js]:JSONSTREAM:countlines ', lines_counter);	
 
 	//send gcode data to serial port
-	spWrite(dlines.gcode);
+	spWrite(dlines);
 });
 
 iStream.write = function (data) {

@@ -169,7 +169,8 @@ jsonStream.on('data', function (dlines) {
 		//dlines[prop]
 
 		// verify is callback is assigned
-		if (arrayHttpCallback[prop].length > 0) {
+		if (arrayHttpCallback.hasOwnProperty(prop) &&
+			arrayHttpCallback[prop].length > 0) {
 			// notify http callbacks for the selected propery
 			console.log("[rest.js]:Calling Http Request Callback function...");
 			arrayHttpCallback[prop].shift()({ "data": dlines});	
