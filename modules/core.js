@@ -9,7 +9,8 @@ var config = {serialport: "/dev/ttyACM0", baudrate: 115200},
 	iSerialPort = iserialport.SerialPort, // Serial Port - Localize object constructor
 	spCBAfterOpen = undefined,
 	sp = undefined,
-	spFlagInit = false;
+	spFlagInit = false,
+	emulatedPrinterResponseTime = 5000;
 
 // module interface stream
 var stream = require('stream'),
@@ -109,10 +110,10 @@ function verifyUpdateConfig (iconfig) {
 function spWrite (dlines) {
 	
 	var cmd = dlines.gcode;
-	var id = dlines.id;
+	var cmdid = dlines.cmdid;
 
-	if (id === undefined)
-		id = 0;
+	if (cmdid === undefined)
+		cmid = 0;
 
 	if (cmd === undefined || cmd.length == 0) {
 		spCBResponse("empty_cmd\n");
@@ -135,15 +136,15 @@ function spWrite (dlines) {
 			cmd = " G4 P10"; // do nothing for 10 ms
 	}
 
-	if (id > 0)
-		console.log("[core.js]:spWrite: ID[%d]=%s", id, cmd+endchar);
+	if (cmdid > 0)
+		console.log("[core.js]:spWrite: CMDID[%d]=%s", cmdid, cmd+endchar);
 	else
 		console.log("[core.js]:spWrite: %s", cmd+endchar);
 
-	// add id to response list
-	if (id > 0) {
-		console.log("[core.js]:Pushing ID=%d to response list", id);
-		idcmdlist.push(id);
+	// add cmdid to response list
+	if (cmdid > 0) {
+		console.log("[core.js]:Pushing CMDID=%d to response list", cmdid);
+		idcmdlist.push(cmdid);
 	}
 
 	// writes data to serialport
@@ -157,7 +158,7 @@ function spWrite (dlines) {
 			//console.log('[core.js]: SerialPort simulated callback response (/dev/null): ok\r\n');
 			spCBResponse("ok\n");
 
-		}, 100 );
+		}, emulatedPrinterResponseTime );
 	}
 
 	return true;
@@ -199,9 +200,9 @@ function spCBResponse (data) {
 			// normal response
 			var rescmd = {"response":idata};
 			if (idcmdlist.length > 0) {
-				rescmd.id = idcmdlist.shift();
+				rescmd.cmdid = idcmdlist.shift();
 
-				console.log("[core.js]:Adding ID=%d to response: %s", rescmd.id, JSON.stringify(rescmd));
+				console.log("[core.js]:Adding CMDID=%d to response: %s", rescmd.cmdid, JSON.stringify(rescmd));
 			}
 
 			oStream.emit('data', JSON.stringify(rescmd)+'\r\n\r\n');			
