@@ -20,6 +20,7 @@ var cmdmap = {"list":
   {"hwid":0,"type":"button","trigger":true,"action":"Extrude","cmd":"G1 E10 F4000"}, 
   {"hwid":3,"type":"button","trigger":true,"action":"Retract","cmd":"G1 E-10 F4000"},
 
+  {"hwid":1,"type":"button","trigger":true,"action":"Relative Mov. Cmd.","cmd":"G91"},
   {"hwid":2,"type":"button","trigger":true,"action":"Get Temp.","cmd":"M105"},
   
   {"hwid":4,"type":"button","trigger":true,"action":"Fan ON","cmd":"M106 255"},
@@ -28,8 +29,12 @@ var cmdmap = {"list":
   {"hwid":6,"type":"button","trigger":true,"action":"Set Temp. 220º","cmd":"M104 S220"},
   {"hwid":7,"type":"button","trigger":true,"action":"Set Temp. 0º","cmd":"M104 S0"},
 
+  {"hwid":8,"type":"button","trigger":true,"action":"Motors OFF","cmd":"M18"},
+  {"hwid":9,"type":"button","trigger":true,"action":"Motors ON","cmd":"M17"},
+
   // pad
-  {"hwid":2,"type":"pad","trigger":true,"action":"Pad demo","cmd":"G4 P10"},
+  {"hwid":0,"type":"pad","trigger":true,"action":"Pad X","cmd":"G1 X$var1 F$var2"},
+  {"hwid":1,"type":"pad","trigger":true,"action":"Pad Y","cmd":"G1 Y$var1 F$var2"}
 ]};
 
 // response listener stream
@@ -135,7 +140,7 @@ function parseData (data) {
   }
 
   //if (devicedata.type !== "") // skip initial buffered data
-    //console.log("[joystick.js]:deviceEvent: ", JSON.stringify(devicedata));
+  //  console.log("[joystick.js]:deviceEvent: ", JSON.stringify(devicedata));
 
   return devicedata;
 }
@@ -145,14 +150,41 @@ function processData (devicedata) {
   if (devicedata.type === "") // skip initial buffered data
     return;
 
+  // special case: PAD trigger=false -> should remove any matching
+  // pad entry (inprinting=false) in the queue to avoid REPEAT command
+  // and replace the current hwid with -1 to current inprinting=true
+  if (devicedata.type === "pad" && devicedata.trigger == false) {
+    
+    //console.log("[joystick.js]: PAD RESET");
+
+    for (i=queuedcmd.length-1; i>=0; i--) {
+      if (queuedcmd[i].hwid == devicedata.hwid &&
+          queuedcmd[i].type == devicedata.type) {
+
+        if (queuedcmd[i].inprinting == false) {
+          //console.log("[joystick.js]: Removed PAD queued entry to cancel REPEAT: ",
+          //  JSON.stringify(queuedcmd[i]));
+  
+          queuedcmd.splice(i,1);
+        }
+        else {
+          //console.log("[joystick.js]: PAD hwid reset to cancel REPEAT: ",
+          //  JSON.stringify(queuedcmd[i]));
+  
+          queuedcmd[i].hwid = -1;          
+        }
+      }
+    }
+  }
+
   // search for mapped commands
   cmdmap.list.forEach(function(element){ 
     
     if (element.type == devicedata.type &&
       element.hwid == devicedata.hwid && 
-      element.trigger == devicedata.trigger) {
+      element.trigger == devicedata.trigger) {        
 
-        console.log("[joystick.js]:found joystick matching rule: ", element.action);
+        console.log("[joystick.js]: Found joystick matching rule: ", element.action);
 
         // before adding the new matching command to the queue, checks if
         // there is any similar command already present in queue but not 
@@ -166,7 +198,7 @@ function processData (devicedata) {
               queuedcmd[i].trigger == devicedata.trigger &&
               queuedcmd[i].inprinting == false) {
 
-            console.log("[joystick.js]:found command in queue, replace with new data");
+            //console.log("[joystick.js]:found command in queue, replace with new data");
 
             queuedcmd[i].value0 = devicedata.value0;
             queuedcmd[i].value1 = devicedata.value1;
@@ -200,12 +232,47 @@ function processData (devicedata) {
   }); 
 }
 
+// special function to parse custom joystick PAD commands 
+function parseGCode (qcmd) {
+  // if button returns the normal cmdgcode property
+  if (qcmd.type == "button")
+    return qcmd.cmdgcode;
+
+  // cmd.type == "pad"
+  var gcode = qcmd.cmdgcode;
+  //console.log("[joystick.js]: Parsing original pad gcode cmd: ",gcode);
+
+  var percentvalue = parseFloat(qcmd.percentage);
+  var datavalue = percentvalue/10;
+  var speedvalue = 500 + Math.abs(Math.round(percentvalue*20));
+  
+  gcode = gcode.replace(/\$var1/g, datavalue);
+  gcode = gcode.replace(/\$var2/g, speedvalue.toFixed(3)); // may need to adjust speed in function of $var1
+
+  console.log("[joystick.js]: Parsed gcode cmd: ",gcode);
+
+  return gcode;
+
+}
+
 function triggerQueue () {
 
   if (queuedcmd.length > 0) {
-    var jsoncmd = {"cmdid":queuedcmd[0].cmdid,"gcode":queuedcmd[0].cmdgcode};
-    //console.log("[joystick.js]:Sending command from queue: ", JSON.stringify(jsoncmd));
-    cmdStreamPrinter.emit('data', jsoncmd);
+    var icmdid = queuedcmd[0].cmdid;
+    var icmdgcode = parseGCode(queuedcmd[0]);
+    var jsoncmd = {"cmdid":icmdid,"gcode":icmdgcode};
+    if (queuedcmd[0].type === "pad") {
+      var timesample = (150/100)*Math.abs(Math.round(parseFloat(queuedcmd[0].percentage)));
+      // special case: PAD -> delayed printer write
+      setTimeout( function () {
+        //console.log("[joystick.js]:Sending command from queue: ", JSON.stringify(jsoncmd));
+        cmdStreamPrinter.emit('data', jsoncmd);
+      },25+timesample);
+    }
+    else {
+      //console.log("[joystick.js]:Sending command from queue: ", JSON.stringify(jsoncmd));
+      cmdStreamPrinter.emit('data', jsoncmd);      
+      }
     queuedcmd[0].inprinting = true;
   }
   else {
@@ -227,13 +294,36 @@ function triggerResponse (dlines) {
     if (removeindex >= 0) {
         // removing processed command from queue
         var qcmd = queuedcmd.splice(removeindex,1);
-        //console.log("[joystick.js]:Found a matching response, removing from queue: ",JSON.stringify(qcmd));
+        //console.log("[joystick.js]:Found a matching response, removing from queue: ",
+        //  JSON.stringify(qcmd));
+
+        // verify if previous qcmd was from a PAD
+        // if queue does not have a similar command, resends it to queue for REPEAT functionality       
+        if (qcmd[0].type === "pad" && qcmd[0].hwid >= 0) {
+          var pad_found = false;
+          for (i=0; i<queuedcmd.length; i++) {
+            if (queuedcmd[i].type == qcmd[0].type &&
+                queuedcmd[i].hwid == qcmd[0].hwid &&
+                queuedcmd[i].trigger == qcmd[0].trigger) {  
+              pad_found = true;
+              break;
+            }
+          } 
+          // found a similar cmd in queue, skiping REPEAT
+          if (pad_found) {
+            //console.log("[joystick.js]: PAD command already in queue, skiping REPEAT");
+          }
+          else {
+            //console.log("[joystick.js]: Repeat PAD key: ",JSON.stringify(qcmd[0]));
+            qcmd[0].cmdid = getId();
+            qcmd[0].inprinting = false;
+            queuedcmd.push(qcmd[0]);
+          }
+        }
 
         // process the next command in queue (from top)
-        setTimeout( function () {
-          //console.log("[joystick.js]:Queue AUTO trigger command ");
-          triggerQueue();
-        }, 1);
+        //console.log("[joystick.js]:Queue AUTO trigger command ");
+        triggerQueue();
     }
   }  
 }
