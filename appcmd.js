@@ -20,29 +20,52 @@
 // G1 Z0.200 F7800.000\n
 //------------------------------------------------------------------
 
+var configdata = require('config');
+var node_env = 
+        process.env.NODE_ENV !== undefined ? 
+        process.env.NODE_ENV : 
+        "default";
+console.log("[appcmd.js]:config/%s.json: $s", node_env, JSON.stringify(configdata));
+
 var fs = require('fs'),
 	path = process.argv[2],
 	readableStream,
-	core = require('./modules/core.js');
+	printercore = require('./modules/core.js');
 
 //------------------------------------------------------------------
 // objects initialization/configuration
 //------------------------------------------------------------------
-core.setCbAfterOpenPrinter(main);
+printercore.setCbAfterOpenPrinter(delayedmain);
 
 // try interface without real 3d printer by using /dev/null
-core.setConfigPrinter({serialport: "/dev/null", baudrate: 115200});
-//core.setConfigPrinter({serialport: "/dev/tty.usbmodem621", baudrate: 115200});
-//core.setConfigPrinter({serialport: "/dev/tty.usbmodem622", baudrate: 115200});
+//printercore.setConfigPrinter({serialport: "/dev/null", baudrate: 115200});
+//printercore.setConfigPrinter({serialport: "/dev/tty.usbmodem621", baudrate: 115200});
+//printercore.setConfigPrinter({serialport: "/dev/tty.usbmodem622", baudrate: 115200});
 
 // or (with 3d printer hardware) - alternative init method with args
-//core.initializePrinter({serialport: "/dev/tty.usbmodem621", baudrate: 115200});
+//printercore.initializePrinter({serialport: "/dev/tty.usbmodem621", baudrate: 115200});
 
-core.initializePrinter();
+var spconfig = {};
+
+spconfig.serialport = 
+	configdata.serialport.serialport !== undefined ?
+	configdata.serialport.serialport :
+	"/dev/null";
+
+spconfig.baudrate = 
+	configdata.serialport.baudrate !== undefined ?
+	configdata.serialport.baudrate :
+	115200;
+
+printercore.initialize(spconfig);
 
 //------------------------------------------------------------------
 // main
 //------------------------------------------------------------------
+
+function delayedmain () {
+	setTimeout(main, 20000);
+}
 
 function main () {
 	console.log("Launching Main();");
@@ -51,15 +74,15 @@ function main () {
 	if (path !==undefined ) {
 		readableStream = fs.createReadStream(path, {'bufferSize': 1 * 256});
 		readableStream.setEncoding('utf8');
-		readableStream.pipe(core.iStreamPrinter);
-		core.oStreamPrinter.pipe(process.stdout);
+		readableStream.pipe(printercore.iStreamPrinter);
+		printercore.oStreamPrinter.pipe(process.stdout);
 	}
 	else {
 		console.log("Get stream from STDIN pipe...");
 		// http://docs.nodejitsu.com/articles/advanced/streams/how-to-use-stream-pipe
 
 		process.stdin.setEncoding('utf8');
-		process.stdin.pipe(core.iStreamPrinter, { end: false });
-		core.oStreamPrinter.pipe(process.stdout);
+		process.stdin.pipe(printercore.iStreamPrinter, { end: false });
+		printercore.oStreamPrinter.pipe(process.stdout);
 	}
 }
