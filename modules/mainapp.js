@@ -70,7 +70,7 @@ function sendPrinterData (filename) {
 	var path = process.cwd()+'/bin/gcode/'+filename;
 	console.log('Send file to printer: %s', path);
 
-	readableStream = fs.createReadStream(path, {'bufferSize': 1 * 256});
+	readableStream = fs.createReadStream(path, {'bufferSize': 1 * 8192});
 	readableStream.setEncoding('utf8');
 
 	// This catches any errors that happen while creating the readable stream (usually invalid names)

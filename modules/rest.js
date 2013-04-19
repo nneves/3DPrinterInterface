@@ -165,7 +165,7 @@ jsonStream.on('data', function (dlines) {
 	// REST response
 	// verify message property to check if its mapped to propagate
 	for (prop in dlines) {
-		console.log("[rest.js]:Found jsonStream mapped property:", prop);
+		//console.log("[rest.js]:Found jsonStream mapped property:", prop);
 		//dlines[prop]
 
 		// verify is callback is assigned
