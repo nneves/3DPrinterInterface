@@ -53,6 +53,9 @@ var arrayHttpCallback = {
 // re-channel request from standard "response" type to "temperature"
 var gcodeCustomResponse = {"M105": "temperature"};
 
+// remote printer callback (HTTP Long pooling)
+var arrayRemotePrinterCallback = [];
+
 //------------------------------------------------------------------
 // initialization
 //------------------------------------------------------------------
@@ -155,6 +158,8 @@ app.router.get(/api\/getfileliststlasync\/((\w|.)*)/, getFileListSTLASync);
 //app.router.get(/urldownload\/((\w|.)*)/, downloadUrl);
 
 app.router.get(/api\/getwsconfig\/((\w|.)*)/, getWSConfig);
+
+app.router.get(/api\/remoteprintercallback\/((\w|.)*)/, remotePrinterCallback);
 
 //------------------------------------------------------------------
 // functions
@@ -311,6 +316,17 @@ function sendPrinterCmd (data) {
 
 	// sending command to printer
 	mainapp.sendPrinterCmd(data);
+
+	if(arrayRemotePrinterCallback.length > 0) {
+
+		console.log('[rest.js]:remotePrinterCallback:sendPrinterCmd', JSON.stringify(data));
+		var ires = arrayRemotePrinterCallback.pop();
+
+		// responding back to the brower request
+		ires.writeHead(200, {'Content-Type':'application/json'});
+		ires.write(JSON.stringify(data));
+		ires.end();
+	}
 }
 
 /**
@@ -568,6 +584,39 @@ function getWSConfig () {
 	this.res.writeHead(200, {'Content-Type':'application/json'});
 	this.res.write(JSON.stringify(response));
 	this.res.end();
+}
+
+/**
+ * Experimental
+ *
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * Examples:
+ *
+ *     http://restapi_ip:port/api/getwsconfig/
+ *
+ * @see GET
+ * @return {Object} {"response":{"ipaddress":"127.0.0.1","tcpport":8081,"websockets":false}}
+ * @api public
+ */
+function remotePrinterCallback () {
+
+	/*
+	var response = {'response': 'ok'};
+	console.log('[rest.js]:remotePrinterCallback: ',response);
+
+	// responding back to the brower request
+	this.res.writeHead(200, {'Content-Type':'application/json'});
+	this.res.write(JSON.stringify(response));
+	this.res.end();
+	*/
+
+	console.log('[rest.js]:remotePrinterCallback: Add Printer to Callback Array: ', this.res.req.headers.host);
+	arrayRemotePrinterCallback.push(this.res);
 }
 
 //------------------------------------------------------------------
