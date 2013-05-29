@@ -319,13 +319,14 @@ function sendPrinterCmd (data) {
 
 	if(arrayRemotePrinterCallback.length > 0) {
 
-		var json_data  = {'printercmd':data};
+		var rdata = data+"\n";
+		var json_data  = {'printercmd':rdata};
 		console.log('[rest.js]:remotePrinterCallback:sendPrinterCmd', JSON.stringify(json_data));
 		var ires = arrayRemotePrinterCallback.pop();
 
 		// responding back to the brower request
 		ires.writeHead(200, {'Content-Type':'application/json'});
-		ires.write(JSON.stringify(json_data	));
+		ires.write(JSON.stringify(json_data));
 		ires.end();
 	}
 }
