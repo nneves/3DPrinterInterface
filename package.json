@@ -6,7 +6,7 @@
     "union": "0.3.0",
     "flatiron": "0.2.8",
     "ecstatic": "0.1.6",
-    "serialport": "1.0.4",
+    "serialport": "1.1.0",
     "request": "2.12.0",
     "json-stream": "0.1.2",
     "socket.io": "0.9.10",
