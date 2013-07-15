@@ -10,7 +10,7 @@ var config = {serialport: "/dev/ttyACM0", baudrate: 115200},
 	spCBAfterOpen = undefined,
 	sp = undefined,
 	spFlagInit = false,
-	emulatedPrinterResponseTime = 5000;
+	emulatedPrinterResponseTime = 50;
 
 // module interface stream
 var stream = require('stream'),
@@ -265,7 +265,7 @@ function emulatePrinterInitMsg () {
 			spCBResponse("printer: 3D Printer Initialization Messages\n");
 			spCBResponse("printer: Emulated printer is ready!\n");
 
-		}, 1000 );
+		}, emulatedPrinterResponseTime );
 	}
 };
 
