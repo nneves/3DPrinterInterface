@@ -29,8 +29,10 @@ console.log("[appcmd.js]:config/%s.json: $s", node_env, JSON.stringify(configdat
 
 var fs = require('fs'),
 	path = process.argv[2],
-	readableStream,
 	printercore = require('./modules/core.js');
+
+var	readableStream;
+var readableSize = 4*256;	
 
 //------------------------------------------------------------------
 // objects initialization/configuration
@@ -64,7 +66,7 @@ printercore.initialize(spconfig);
 //------------------------------------------------------------------
 
 function delayedmain () {
-	setTimeout(main, 20000);
+	setTimeout(main, 2000);
 }
 
 function main () {
@@ -72,10 +74,14 @@ function main () {
 	
 	// check if .gcode file is inserted via command line arguments
 	if (path !==undefined ) {
-		readableStream = fs.createReadStream(path, {'bufferSize': 1 * 256});
-		readableStream.setEncoding('utf8');
-		readableStream.pipe(printercore.iStreamPrinter);
+		readableStream = fs.createReadStream(path, {encoding: 'utf8', highWaterMark : 8});
+		//readableStream.pipe(process.stdout);
+		readableStream.pipe(printercore.iStreamPrinter, {end: false});
 		printercore.oStreamPrinter.pipe(process.stdout);
+
+		readableStream.once('end', function() {
+  			console.log('Readable Stream Ended');
+		});				
 	}
 	else {
 		console.log("Get stream from STDIN pipe...");
@@ -85,4 +91,6 @@ function main () {
 		process.stdin.pipe(printercore.iStreamPrinter, { end: false });
 		printercore.oStreamPrinter.pipe(process.stdout);
 	}
+
+	readableStream.read(readableSize);
 }

@@ -13,9 +13,9 @@ var config = {serialport: "/dev/ttyACM0", baudrate: 115200},
 	emulatedPrinterResponseTime = 50;
 
 // module interface stream
-var stream = require('stream'),
-	iStream = new stream.Stream(),
-	oStream = new stream.Stream();
+var stream = require('stream');
+var iStream = new stream.Writable({highWaterMark : 8});
+var oStream = new stream.Stream();
 
 // lower level stream - hardware
 var JSONStream = require('json-stream'),
@@ -29,6 +29,7 @@ var array_block = [];
 var array_strbuffer = "";
 var lines_counter = 0;
 var idcmdlist = [];
+var blocklinethreshold = 10;
 
 //------------------------------------------------------------------
 // public functions
@@ -272,7 +273,7 @@ function emulatePrinterInitMsg () {
 function dataBlockLineTrigger () {
 		
 	// verify if it can 'drain' the iStream
-	if (array_block.length == 0 <= 0) {
+	if (array_block.length <= blocklinethreshold) {
 		//console.log("[core.js]:dataBlockLineTrigger: array_block.length == 0 => iStream Emit 'Drain'");
 		iStream.emit('drain');
 	}
@@ -347,7 +348,7 @@ iStream.write = function (data) {
 	}
 
 	//console.log("[core.js]:iStream: Preparing to print Block Data:");
-	/* for (var i=0; i<array_block.length; i++) {
+	/*for (var i=0; i<array_block.length; i++) {
 		console.log("> %s",array_block[i]);
 	}*/
 
